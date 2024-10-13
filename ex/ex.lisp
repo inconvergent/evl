@@ -1,7 +1,7 @@
 #!/usr/local/bin/sbcl --script
 
 (load "~/quicklisp/setup.lisp")
-(ql:quickload :evl)
+(ql:quickload :evl) ; must be available locally. eg. in ~/common-lisp/evl
 (in-package :evl)
 
 (defun main ()

@@ -1,4 +1,4 @@
 (defpackage #:evl
   (:use #:common-lisp)
   (:nicknames #:cl-evl)
-  (:export evl))
+  (:export #:evl #:label))

@@ -7,7 +7,8 @@
              (lambda (y) (loop for k in kk and v in vv
                                if (equal k y) do (return v)
                                finally (return (funcall env y))))))
-    (cond ((null expr)    nil)
+    (cond ((null expr) nil)
+          ((stringp expr) expr)
           ((numberp expr) expr)
           ((keywordp expr) expr)
           ((symbolp expr) (funcall env expr))

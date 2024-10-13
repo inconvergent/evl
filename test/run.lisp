@@ -1,6 +1,9 @@
 
 (setf prove:*enable-colors* nil)
-(defpackage #:evl-tests (:use #:cl #:prove) (:export #:run-tests))
+(defpackage #:evl-tests
+  (:use #:cl #:prove)
+  (:import-from #:evl #:evl)
+  (:export #:run-tests))
 (in-package #:evl-tests)
 
 (defun -run-tests (files)
