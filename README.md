@@ -16,3 +16,10 @@
 
 more examples in [ex/ex.lisp](ex/ex.lisp).
 
+## Resources
+
+For a great talk on this topic see this presentation by William Byrd:
+
+The Most Beautiful Program Ever Written
+(https://www.youtube.com/watch?v=OyfBQmvr2Hc)
+
