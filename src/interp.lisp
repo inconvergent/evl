@@ -2,8 +2,28 @@
 
 ; TODO: argument count guards
 
+(defparameter +std-env+
+  `((+ . +) (- . -) (/ . /) (* . *) (1+ . 1+) (1- . 1-)
+    (t . t) (= . =) (< . <) (> . >) (equal . equal)
+    (evenp . evenp) (oddp . oddp) (null . null)
+    (first . first) (second . second) (third . third) (nth . nth)
+    (find . find) (member . member)
+    (car . car) (cdr . cdr) (cons . cons)
+    (assoc . assoc) (pairlis . pairlis) (acons . acons)
+    (print . print) (list . list)
+    (signum . signum) (floor . floor) (round . round)
+    (truncate . truncate) (float . float) (ceiling . ceiling)
+    (abs . abs) (min . min) (max . max)
+    (sqrt . sqrt) (exp . exp) (expt . expt) (log . log)
+    (mod . mod) (rem . rem) (gcd . gcd) (lcm . lcm)
+    (sin . sin) (cos . cos) (tan . tan)
+    (asin . asin) (acos . acos) (atan . atan)
+    (sinh . sinh) (cosh . cosh) (tanh . tanh))
+  "standard environment functions in evl")
+
 (defun car-is (l s) (and (consp l) (equal (car l) s)))
 (defun extenv (env kk vv)
+  "new env function with these names (kk) and values (vv)"
   (lambda (y) (let ((res (find y (mapcar #'list kk vv) :key #'car)))
                 (if res (second res)
                         (funcall env y)))))

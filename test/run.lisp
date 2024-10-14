@@ -2,7 +2,7 @@
 (setf prove:*enable-colors* nil)
 (defpackage #:evl-tests
   (:use #:cl #:prove)
-  (:import-from #:evl #:evl)
+  (:import-from #:evl #:evl #:+std-env+)
   (:export #:run-tests))
 (in-package #:evl-tests)
 

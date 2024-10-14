@@ -5,10 +5,9 @@
 (subtest "evl"
 
   (let* ((s 104) (k 107)
-         (kv `((+ . +) (- . -) (/ . /) (* . *) (1+ . 1+) (1- . 1-)
-               (= . equal) (< . <) (> . >) (t . t) (list . list)
-               (s . ,s) (k . ,k) ; custom vars
-               (myfx . ,(lambda (k) (+ (sin k) (cos (- k)))))))) ; custom fx
+         (kv `((s . ,s) (k . ,k)
+               (myfx . ,(lambda (k) (+ (sin k) (cos (- k)))))
+               ,@+std-env+)))
 
     (labels ((env (x &aux (res (assoc x kv)))
                (if res (cdr res) (error "EVL: undefined variable: ~a" x))))
