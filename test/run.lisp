@@ -2,7 +2,11 @@
 (setf prove:*enable-colors* nil)
 (defpackage #:evl-tests
   (:use #:cl #:prove)
-  (:import-from #:evl #:evl #:+std-env+)
+  (:import-from #:evl
+    #:+std-env+
+    #:evl #:car-is #:evl/extenv #:evl/eval-dsb #:evl/eval-lambda
+    #:evl/do-labels #:evl/do-let #:evl/do-cond
+    )
   (:export #:run-tests))
 (in-package #:evl-tests)
 
@@ -19,5 +23,5 @@
           finally (return (unless (< fails 1) (uiop:quit 7))))))
 
 (defun run-tests ()
-  (-run-tests '(#P"test/test-evl.lisp"))
-  )
+  (-run-tests '(#P"test/test-evl.lisp"
+                #P"test/test-evl-evl.lisp")))

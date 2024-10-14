@@ -50,7 +50,12 @@
                            (add1 (x) (1+ x))
                            (sub1 (x) (1- x)))
                     (add0 7))))
-      )))
+
+      (xprt (evl. '(cond ((< 2 1) 7)
+                         ((< 1 2) 8)
+                         (t :aa))))
+
+      (xprt (evl. '((lambda (&rest rest) rest) 999 333))))))
 
 (main)
 
