@@ -7,7 +7,7 @@
   (let* ((s 104) (k 107)
          (kv `((+ . +) (- . -) (/ . /) (* . *) (1+ . 1+) (1- . 1-)
                (= . equal) (< . <) (> . >) (t . t) (list . list)
-               (s . ,s) (k . ,k) ; custom var
+               (s . ,s) (k . ,k) ; custom vars
                (myfx . ,(lambda (k) (+ (sin k) (cos (- k)))))))) ; custom fx
 
     (labels ((env (x &aux (res (assoc x kv)))
@@ -37,7 +37,6 @@
       (is (evl '(let ((a 1) (b 20)) (+ a b)) #'env) (+ 1 20))
       (is (evl '(let ((a 1) (b 20)) (+ a b) (- a b)) #'env) (- 1 20))
 
-      ; this should not work
       (is-error (evl '(let ((a 1) (b (1+ a)))
                      (list a b)) #'env)
                 error)
@@ -52,6 +51,14 @@
                                        (* x (fact (1- x))))))
                  (fact 7))
                #'env)
-          5040))))
+          5040)
+
+      (is (evl '(labels ((add0 (x) (add1 (sub1 x)))
+                         (add1 (x) (1+ x))
+                         (sub1 (x) (1- x)))
+                  (add0 7))
+               #'env)
+          7)
+      )))
 
 (unless (finalize) (error "error in test-evl"))

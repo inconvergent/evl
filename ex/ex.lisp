@@ -8,8 +8,12 @@
 
 (defun main ()
   (let ((kv `((+ . +) (- . -) (/ . /) (* . *) (1+ . 1+) (1- . 1-) ; pass through fxs
-              (t . t) (= . equal) (< . <) (> . >)
-              (car . car) (cdr . cdr) (cons . cons) (assoc . assoc)
+              (t . t) (= . =) (< . <) (> . >) (equal . equal)
+              (evenp . evenp) (oddp . oddp) (null . null)
+              (first . first) (second . second) (third . third) (nth . nth)
+              (find . find) (member . member)
+              (car . car) (cdr . cdr) (cons . cons)
+              (assoc . assoc) (pairlis . pairlis) (acons . acons)
               (print . print) (list . list)
               (signum . signum) (floor . floor) (round . round)
               (truncate . truncate) (float . float) (ceiling . ceiling)
@@ -57,6 +61,12 @@
                                          1
                                          (* x (fact (1- x))))))
                     (fact 7))
+                 #'env))
+
+      (xprt (evl '(labels ((add0 (x) (add1 (sub1 x)))
+                           (add1 (x) (1+ x))
+                           (sub1 (x) (1- x)))
+                    (add0 7))
                  #'env))
       )))
 
