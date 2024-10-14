@@ -5,7 +5,9 @@
 (defparameter +std-env+
   `((+ . +) (- . -) (/ . /) (* . *) (1+ . 1+) (1- . 1-)
     (t . t) (= . =) (< . <) (> . >) (equal . equal)
-    (evenp . evenp) (oddp . oddp) (null . null)
+    (null . null) (evenp . evenp) (oddp . oddp)
+    (stringp . stringp) (symbolp . symbolp) (keywordp . keywordp)
+    (numberp . numberp) (functionp . functionp)
     (first . first) (second . second) (third . third) (nth . nth)
     (find . find) (member . member)
     (car . car) (cdr . cdr) (cons . cons)
@@ -30,7 +32,7 @@
 
 (defun evl (expr env)
   "evaluate an EVL expression in env."
-  (cond ((null expr) nil)       ; explicitly eval these atoms to themselves
+  (cond ((null expr) nil)       ; explicitly eval atoms to themselves
         ((stringp expr) expr)
         ((numberp expr) expr)
         ((keywordp expr) expr)
