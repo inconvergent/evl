@@ -9,7 +9,7 @@
 (defun main ()
   (let ((kv `((+ . +) (- . -) (/ . /) (* . *) (1+ . 1+) (1- . 1-) ; pass through fxs
               (t . t) (= . equal) (< . <) (> . >)
-              (car . car) (cdr . cdr) (cons . cons)
+              (car . car) (cdr . cdr) (cons . cons) (assoc . assoc)
               (print . print) (list . list)
               (signum . signum) (floor . floor) (round . round)
               (truncate . truncate) (float . float) (ceiling . ceiling)
