@@ -5,6 +5,7 @@
   :in-order-to ((asdf:test-op (asdf:test-op #:evl/tests)))
   :licence "MIT" :pathname "src/" :serial nil
   :components ((:file "packages")
+               (:file "utils")
                (:file "interp")))
 
 (asdf:defsystem #:evl/tests

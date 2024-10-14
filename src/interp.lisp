@@ -1,19 +1,25 @@
 (in-package :evl)
 
+; TODO: dont use loop
+; TODO: argument count guards
+
 (defun evl (expr env)
-  "EVL"
+  "evaluate an EVL expression in env."
   (labels ((car-is (l s) (and (consp l) (equal (car l) s)))
            (extend- (env kk vv)
              (lambda (y) (loop for k in kk and v in vv
                                if (equal k y) do (return v)
                                finally (return (funcall env y))))))
-    (cond ((null expr) nil)
+    (cond ((null expr) nil) ; explicitly eval these atoms to themselves
           ((stringp expr) expr)
           ((numberp expr) expr)
           ((keywordp expr) expr)
-          ((symbolp expr) (funcall env expr))
+          ((functionp expr) expr)
+          ((symbolp expr) (funcall env expr)) ; get symbol from env
 
-          ((car-is expr 'progn)
+          ((car-is expr 'quote) (cadr expr)) ; don't evaluate
+
+          ((car-is expr 'progn) ; evaluate all exprs and return the last result
            (first (last (mapcar (lambda (e) (evl e env)) (cdr expr)))))
 
           ((car-is expr 'if)
@@ -24,14 +30,16 @@
            (destructuring-bind (kk body) (cdr expr)
              (lambda (&rest vv) (evl body (extend- env kk vv)))))
 
-          ((car-is expr 'label)
-           (destructuring-bind (name arg lmbd &rest body) (cdr expr)
-             (labels ((wrp (k) (if (equal k name)
-                                   (evl `(lambda ,arg ,lmbd) #'wrp)
-                                   (funcall env k))))
+          ((car-is expr 'labels) ; define local functions
+           (destructuring-bind (pairs &rest body) (cdr expr)
+             (labels ((wrp (k)
+                        (loop for (name arg xpr) in pairs
+                              if (equal k name)
+                              do (return (evl `(lambda ,arg ,xpr) #'wrp))
+                              finally (return (funcall env k)))))
                (evl `(progn ,@body) #'wrp))))
 
-          ((car-is expr 'let)
+          ((car-is expr 'let) ; define local vars
            (destructuring-bind (vars &rest body) (cdr expr)
              (evl `((lambda ,(mapcar #'car vars)
                             (progn ,@body))

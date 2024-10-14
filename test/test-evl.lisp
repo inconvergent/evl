@@ -5,12 +5,10 @@
 (subtest "evl"
 
   (let* ((s 104) (k 107)
-         (kv `((+ . +) (- . -) (/ . /) (* . *)
-               (= . equal) (< . <) (> . >)
-               (1+ . 1+) (1- . 1-)
-               (t . t)
-               (print . print) (list . list)
-               (s . ,s) (k . ,k))))
+         (kv `((+ . +) (- . -) (/ . /) (* . *) (1+ . 1+) (1- . 1-)
+               (= . equal) (< . <) (> . >) (t . t) (list . list)
+               (s . ,s) (k . ,k) ; custom var
+               (myfx . ,(lambda (k) (+ (sin k) (cos (- k)))))))) ; custom fx
 
     (labels ((env (x &aux (res (assoc x kv)))
                (if res (cdr res) (error "EVL: undefined variable: ~a" x))))
@@ -18,7 +16,12 @@
       (is (evl '1 #'env) 1)
       (is (evl 's #'env) 104)
       (is (evl '(+ s k) #'env) (+ s k))
+      (is (evl '(myfx 1) #'env) 1.3817732)
 
+      (is (evl '(quote 1) #'env) 1)
+      (is (evl '(quote s) #'env) 's)
+      (is (evl '(quote (+ 1 2)) #'env) '(+ 1 2))
+      (is (evl '(quote (+ some-symbol 2)) #'env) '(+ some-symbol 2))
       (is (evl '(list s k) #'env) `(,s ,k))
       (is (evl '(progn s k :progn) #'env) :progn)
 
@@ -44,10 +47,10 @@
                   #'env)
           3)
 
-      (is (evl '(evl:label fact (x) (if (= x 0)
-                                        1
-                                        (* x (fact (1- x))))
-                  (fact 7))
+      (is (evl '(labels ((fact (x) (if (= x 0)
+                                       1
+                                       (* x (fact (1- x))))))
+                 (fact 7))
                #'env)
           5040))))
 
