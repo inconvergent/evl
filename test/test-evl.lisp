@@ -26,6 +26,15 @@
 
       (is (evl '(if (< 4 1) 2 3) #'env) 3)
       (is (evl '(if (< 4 1) 2) #'env) nil)
+      (is (evl '(cond ((< 2 1) 7) ((< 1 2) 8) (t :aa))
+               #'env)
+          8)
+      (is (evl '(cond ((< 1 2) 7) ((< 2 1) 8) (t :aa))
+               #'env)
+          7)
+      (is (evl '(cond ((< 2 1) 7) ((< 3 1) 8) (t :aa))
+               #'env)
+          :aa)
 
       (is (funcall (evl '(lambda (x) x) #'env) 99) 99)
 

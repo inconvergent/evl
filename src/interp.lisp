@@ -21,7 +21,8 @@
     (sin . sin) (cos . cos) (tan . tan)
     (asin . asin) (acos . acos) (atan . atan)
     (sinh . sinh) (cosh . cosh) (tanh . tanh))
-  "standard environment functions in evl")
+  "convenient standard environment functions in evl.
+none of them are required.")
 
 (defun car-is (l s) (and (consp l) (equal (car l) s)))
 (defun extenv (env kk vv)
@@ -47,6 +48,10 @@
         ((car-is expr 'if)
          (destructuring-bind (test then &optional else) (cdr expr)
            (if (evl test env) (evl then env) (evl else env))))
+
+        ((car-is expr 'cond) ; if else-if ... else
+         (destructuring-bind ((cnd xpr) &rest rest) (cdr expr)
+           (evl `(if ,cnd ,xpr (cond ,@rest)) env)))
 
         ((car-is expr 'lambda)
          (destructuring-bind (kk body) (cdr expr)
