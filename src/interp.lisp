@@ -76,9 +76,12 @@ none of them are required.")
            (apply (evl (car expr) env)
                   (mapcar (lambda (x) (evl x env))
                           (cdr expr)))
-           (error (e) (error "EVL: error at ~a: ~a" expr e))))
-        (t (error "EVL: invalid expression: ~a" expr))))
+           (error (e) (error "-->>~%EVL: error at:~%  ~a~%  err:~%    ~a <<--"
+                             expr e))))
+        (t (error "-->>~%EVL: invalid expression:~%  ~a <<--"
+                  expr))))
 
 
-(defmacro evl* (body env)
+(defmacro with-evl ((env) body)
   `(evl ',body ,env))
+
