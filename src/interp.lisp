@@ -5,7 +5,7 @@
 (defparameter +std-env+
   `((+ . +) (- . -) (/ . /) (* . *) (1+ . 1+) (1- . 1-)
     (t . t) (= . =) (< . <) (> . >) (equal . equal)
-    (null . null) (evenp . evenp) (oddp . oddp)
+    (atom . atom) (null . null) (evenp . evenp) (oddp . oddp)
     (stringp . stringp) (symbolp . symbolp) (keywordp . keywordp)
     (numberp . numberp) (functionp . functionp)
     (first . first) (last . last) (second . second) (third . third) (nth . nth)
@@ -38,12 +38,12 @@ requires that evl* handles (quote ...) and ((lambda ...) ...)."
 
 (defun evl (expr env)
   "evaluate an EVL expression in env."
-  (cond ((null expr) nil)       ; explicitly eval atoms to themselves
+  (cond
+        ((null expr) expr)       ; explicitly eval atoms to themselves
         ((stringp expr) expr)
         ((numberp expr) expr)
-        ((keywordp expr) expr)
         ((functionp expr) expr)
-        ; ((quasiquote ))  ??
+        ((keywordp expr) expr)
         ((symbolp expr) (funcall env expr)) ; get symbol from env
 
         ((car-is expr 'quote) (cadr expr)) ; don't evaluate
