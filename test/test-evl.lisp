@@ -79,6 +79,12 @@
                   (list :ok xxx yyy zzz))
                #'env)
           '(:ok :a :b (:c :d 11)))
+
+      (is (evl '(destructuring-bind (aa &optional b&b)
+                      (list 2)
+                  (list :ok aa b&b 3))
+               #'env)
+          '(:ok 2 nil 3))
       )))
 
 (unless (finalize) (error "error in test-evl"))

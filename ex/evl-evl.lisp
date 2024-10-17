@@ -58,7 +58,8 @@
 
             ; (prt (list cnd xpr rest))
             ; (evl.  `(if ,cnd ,xpr (cond ,@rest)) env.)
-            )))
+            ))
+        )
       )))
 
 (main)

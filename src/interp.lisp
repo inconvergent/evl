@@ -26,9 +26,9 @@
 none of them are required.")
 
 (defun eval-dsb (args in expr evl* &aux (args* (flat-dsb-args args)))
-   "get dsb argument values if (evl* in) as a list of quoted values (lst). then do
+   "get dsb argument values of (evl* in) as a list (l) of quoted values. then do:
 (evl* '((lambda (,@args*) expr) ,@lst))
-requires that evl* handles (quote ...) and (lambda ...)."
+requires that evl* handles (quote ...) and ((lambda ...) ...)."
   (funcall evl* `((lambda ,args* ,@expr)
                   ; quote the elements in the list. so they will not be  evaluated by evl*
                   ,@(mapcar (lambda (x) `(quote ,x))
@@ -51,7 +51,8 @@ requires that evl* handles (quote ...) and (lambda ...)."
         ((car-is expr 'progn) ; evaluate all exprs and return the last result
          (first (last (mapcar (lambda (e) (evl e env)) (cdr expr)))))
 
-        ((car-is expr 'destructuring-bind) ; handling &rest/&optional is incomplete
+        ; TODO: &optional defaults does not work
+        ((car-is expr 'destructuring-bind)
          (destructuring-bind (vars in &rest rest) (cdr expr)
            (eval-dsb vars in rest
              (lambda (x) (evl x env)))))
