@@ -36,17 +36,13 @@ none of them are required.")
   (remove-if (lambda (s) (match-substr "&" (mkstr s)))
              (flatten args)))
 
-
-(defun eval-dsb (vars in expr env)
-
-  ""
-  (let ((vals (eval `(destructuring-bind ,vars ,in
-                       (list ,@(flat-dsb-args vars))))))
-    (evl `((lambda ,(flat-dsb-args vars) ,@expr)
-           ,@(mapcar (lambda (x) `(quote ,x)) vals))
-         env)))
-
-
+(defun eval-dsb (vars in expr evl*)
+   "get dsb vars as a list (l). then generates a lambda expression that is passed to evl*.
+requires that evl* implements (CL) semantically correct quote and lambda"
+  (funcall evl* `((lambda ,(flat-dsb-args vars) ,@expr)
+                  ,@(mapcar (lambda (x) `(quote ,x))
+                            (eval `(destructuring-bind ,vars ,in
+                                     (list ,@(flat-dsb-args vars))))))))
 
 (defun evl (expr env)
   "evaluate an EVL expression in env."
@@ -63,26 +59,10 @@ none of them are required.")
         ((car-is expr 'progn) ; evaluate all exprs and return the last result
          (first (last (mapcar (lambda (e) (evl e env)) (cdr expr)))))
 
-        ; (destructuring-bind (args) &body body)
         ((car-is expr 'destructuring-bind) ; ???
          (destructuring-bind (vars in &rest rest) (cdr expr)
-           (eval-dsb vars in rest env)
-           ; nil
-                             ; (evl in env)
-           ; (print `(destructuring-bind (,@vars) ,in
-           ;          (evl `(progn rest)
-           ;               (lambda (k)
-
-           ;                       )
-           ;               )
-           ;                            ))
-
-           ; nil
-           ; nil
-         ; (error "EVL: destructuring-bind is unavailable")
-           )
-         ; (destructuring-bind ())
-         )
+           (eval-dsb vars in rest
+             (lambda (xpr) (evl xpr env)))))
 
         ((car-is expr 'if)
          (destructuring-bind (test then &optional else) (cdr expr)
