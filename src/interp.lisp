@@ -8,7 +8,8 @@
     (null . null) (evenp . evenp) (oddp . oddp)
     (stringp . stringp) (symbolp . symbolp) (keywordp . keywordp)
     (numberp . numberp) (functionp . functionp)
-    (first . first) (second . second) (third . third) (nth . nth)
+    (first . first) (last . last) (second . second) (third . third) (nth . nth)
+    (mapcar . mapcar)
     (find . find) (member . member)
     (car . car) (cdr . cdr) (cons . cons)
     (assoc . assoc) (pairlis . pairlis) (acons . acons)
@@ -31,6 +32,22 @@ none of them are required.")
                 (if res (second res)
                         (funcall env y)))))
 
+(defun flat-dsb-args (args)
+  (remove-if (lambda (s) (match-substr "&" (mkstr s)))
+             (flatten args)))
+
+
+(defun eval-dsb (vars in expr env)
+
+  ""
+  (let ((vals (eval `(destructuring-bind ,vars ,in
+                       (list ,@(flat-dsb-args vars))))))
+    (evl `((lambda ,(flat-dsb-args vars) ,@expr)
+           ,@(mapcar (lambda (x) `(quote ,x)) vals))
+         env)))
+
+
+
 (defun evl (expr env)
   "evaluate an EVL expression in env."
   (cond ((null expr) nil)       ; explicitly eval atoms to themselves
@@ -38,12 +55,34 @@ none of them are required.")
         ((numberp expr) expr)
         ((keywordp expr) expr)
         ((functionp expr) expr)
+        ; ((quasiquote ))  ??
         ((symbolp expr) (funcall env expr)) ; get symbol from env
 
         ((car-is expr 'quote) (cadr expr)) ; don't evaluate
 
         ((car-is expr 'progn) ; evaluate all exprs and return the last result
          (first (last (mapcar (lambda (e) (evl e env)) (cdr expr)))))
+
+        ; (destructuring-bind (args) &body body)
+        ((car-is expr 'destructuring-bind) ; ???
+         (destructuring-bind (vars in &rest rest) (cdr expr)
+           (eval-dsb vars in rest env)
+           ; nil
+                             ; (evl in env)
+           ; (print `(destructuring-bind (,@vars) ,in
+           ;          (evl `(progn rest)
+           ;               (lambda (k)
+
+           ;                       )
+           ;               )
+           ;                            ))
+
+           ; nil
+           ; nil
+         ; (error "EVL: destructuring-bind is unavailable")
+           )
+         ; (destructuring-bind ())
+         )
 
         ((car-is expr 'if)
          (destructuring-bind (test then &optional else) (cdr expr)
@@ -72,12 +111,14 @@ none of them are required.")
                 env)))
 
         ((consp expr) ; (apply fx/lambda ...)
-         (handler-case
+         (progn ;handler-case
            (apply (evl (car expr) env)
                   (mapcar (lambda (x) (evl x env))
                           (cdr expr)))
-           (error (e) (error "-->>~%EVL: error at:~%  ~a~%  err:~%    ~a <<--"
-                             expr e))))
+           ; (error (e) (error "-->>~%EVL: error at:~%  ~a~%  err:~%    ~a <<--"
+           ;                   expr e))
+           )
+         )
         (t (error "-->>~%EVL: invalid expression:~%  ~a <<--"
                   expr))))
 
