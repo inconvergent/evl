@@ -7,6 +7,7 @@
   (let* ((s 104) (k 107)
          (kv `((s . ,s) (k . ,k)
                (myfx . ,(lambda (k) (+ (sin k) (cos (- k)))))
+               (10+ . ,(lambda (x) (+ 10 x)))
                ,@+std-env+)))
 
     (labels ((env (x &aux (res (assoc x kv)))
@@ -67,6 +68,17 @@
                   (add0 7))
                #'env)
           7)
+
+      (is (evl '(destructuring-bind ((xxx yyy) &rest zzz)
+                      '((:a :b) :c :d)
+                  (list :ok yyy xxx zzz))
+             #'env)
+          '(:ok :b :a (:c :d)))
+      (is (evl '(destructuring-bind ((xxx yyy) &rest zzz)
+                      (list (list :a :b) :c :d (10+ 1))
+                  (list :ok xxx yyy zzz))
+               #'env)
+          '(:ok :a :b (:c :d 11)))
       )))
 
 (unless (finalize) (error "error in test-evl"))

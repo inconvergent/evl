@@ -68,3 +68,13 @@
 ; (defun dotted-listp (l) ; TODO: rewrite with rec to require first call to be cons
 ;   (cond ((null l) nil) ((atom l) t) (t (dotted-listp (cdr l)))))
 
+(defun car-is (l s) (and (consp l) (equal (car l) s)))
+(defun extenv (env kk vv)
+  "new env function with these names (kk) and values (vv)"
+  (lambda (y) (let ((res (find y (mapcar #'list kk vv) :key #'car)))
+                (if res (second res)
+                        (funcall env y)))))
+
+(defun flat-dsb-args (args)
+  (remove-if (lambda (s) (match-substr "&" (mkstr s)))
+             (flatten args)))

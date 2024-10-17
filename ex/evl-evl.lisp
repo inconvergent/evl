@@ -53,7 +53,7 @@
           ; (prt (+ 1 2))
           (destructuring-bind
             ((xxx yyy) &rest zzz) ; vars
-            (list (list :a :b) :c :d) ; in
+            (list (list :a :b) :c :d (1+ 1)) ; in
             (prt (list :ok xxx yyy zzz))
 
             ; (prt (list cnd xpr rest))

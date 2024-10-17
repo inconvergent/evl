@@ -25,24 +25,16 @@
   "convenient standard environment functions in evl.
 none of them are required.")
 
-(defun car-is (l s) (and (consp l) (equal (car l) s)))
-(defun extenv (env kk vv)
-  "new env function with these names (kk) and values (vv)"
-  (lambda (y) (let ((res (find y (mapcar #'list kk vv) :key #'car)))
-                (if res (second res)
-                        (funcall env y)))))
-
-(defun flat-dsb-args (args)
-  (remove-if (lambda (s) (match-substr "&" (mkstr s)))
-             (flatten args)))
-
-(defun eval-dsb (vars in expr evl*)
-   "get dsb vars as a list (l). then generates a lambda expression that is passed to evl*.
-requires that evl* implements (CL) semantically correct quote and lambda"
-  (funcall evl* `((lambda ,(flat-dsb-args vars) ,@expr)
+(defun eval-dsb (args in expr evl* &aux (args* (flat-dsb-args args)))
+   "get dsb argument values if (evl* in) as a list of quoted values (lst). then do
+(evl* '((lambda (,@args*) expr) ,@lst))
+requires that evl* handles (quote ...) and (lambda ...)."
+  (funcall evl* `((lambda ,args* ,@expr)
+                  ; quote the elements in the list. so they will not be  evaluated by evl*
                   ,@(mapcar (lambda (x) `(quote ,x))
-                            (eval `(destructuring-bind ,vars ,in
-                                     (list ,@(flat-dsb-args vars))))))))
+                      ; use CL dsb to get variables as a list
+                      (eval `(destructuring-bind ,args ',(funcall evl* in)
+                               (list ,@args*)))))))
 
 (defun evl (expr env)
   "evaluate an EVL expression in env."
@@ -59,18 +51,18 @@ requires that evl* implements (CL) semantically correct quote and lambda"
         ((car-is expr 'progn) ; evaluate all exprs and return the last result
          (first (last (mapcar (lambda (e) (evl e env)) (cdr expr)))))
 
-        ((car-is expr 'destructuring-bind) ; ???
+        ((car-is expr 'destructuring-bind) ; handling &rest/&optional is incomplete
          (destructuring-bind (vars in &rest rest) (cdr expr)
            (eval-dsb vars in rest
-             (lambda (xpr) (evl xpr env)))))
+             (lambda (x) (evl x env)))))
 
         ((car-is expr 'if)
          (destructuring-bind (test then &optional else) (cdr expr)
            (if (evl test env) (evl then env) (evl else env))))
 
         ((car-is expr 'cond) ; if else-if ... else
-         (destructuring-bind ((cnd xpr) &rest rest) (cdr expr)
-           (evl `(if ,cnd ,xpr (cond ,@rest)) env)))
+         (destructuring-bind ((cnd x) &rest rest) (cdr expr)
+           (evl `(if ,cnd ,x (cond ,@rest)) env)))
 
         ((car-is expr 'lambda)
          (destructuring-bind (kk body) (cdr expr)
@@ -91,14 +83,12 @@ requires that evl* implements (CL) semantically correct quote and lambda"
                 env)))
 
         ((consp expr) ; (apply fx/lambda ...)
-         (progn ;handler-case
+         (handler-case
            (apply (evl (car expr) env)
                   (mapcar (lambda (x) (evl x env))
                           (cdr expr)))
-           ; (error (e) (error "-->>~%EVL: error at:~%  ~a~%  err:~%    ~a <<--"
-           ;                   expr e))
-           )
-         )
+           (error (e) (error "-->>~%EVL: error at:~%  ~a~%  err:~%    ~a <<--"
+                             expr e))))
         (t (error "-->>~%EVL: invalid expression:~%  ~a <<--"
                   expr))))
 
