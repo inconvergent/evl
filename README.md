@@ -14,7 +14,7 @@
                 #'env))))
 ```
 
-more examples in [ex/ex.lisp](ex/ex.lisp).
+more examples in [/ex.lisp](/ex.lisp).
 
 ## Resources
 

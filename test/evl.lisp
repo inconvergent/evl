@@ -3,13 +3,14 @@
 (plan 2)
 
 (subtest "evl default env"
-  (is-error (evl* 's) 'error)
+  (is-error (evl* 's) 'warning)
   (is (evl '1 (lambda (k) (declare (ignore k)) (warn "nop"))) 1)
   (is-error (evl '+ (lambda (k) (declare (ignore k)) (warn "nop"))) 'warning)
   (is-error (evl '(+ 1 2) (lambda (k) (declare (ignore k)) (warn "nop"))) 'warning)
   (is (evl* '+) '+)
   (is (evl* '(+ 1 2)) 3)
-  (is (evl* '(let ((a 1) (b 2)) (list b a))) '(2 1)))
+  (is (evl* '(let ((a 1) (b 2)) (list b a))) '(2 1))
+  (is (with-env () (let ((a 1) (b 2)) (list b a))) '(2 1)))
 
 
 (subtest "evl custom env"
@@ -28,9 +29,9 @@
       (is (evl '+ #'env) '+)
       (is (evl 's #'env) 104)
       (is (evl '(progn s) #'env) 104)
-      (is (evl '(list s m) (evl/extenv #'env '(s m) '(105 106))) '(105 106))
+      (is (evl '(list s m) (env/extend-pair '(s m) '(105 106) #'env)) '(105 106))
       (is (evl '((lambda (x) s) -1) #'env) s)
-      (is (evl '((lambda (x) s) -1) (evl/extenv #'env '(s) (list 999))) 999)
+      (is (evl '((lambda (x) s) -1) (env/extend-pair '(s) (list 999) #'env)) 999)
 
       (is (evl '(+ s k) #'env) (+ s k))
       (is (evl '(myfx 1) #'env) 1.3817732)
@@ -78,14 +79,14 @@
 
       (is-error (evl '(let ((a 1) (b (1+ a)))
                         (list a b)) #'env)
-                error)
+                'evl:evl-error)
 
       (is (evl '(let ((fx (lambda (x) (+ 1 x))))
                   (fx (fx 1)))
                #'env)
           3)
 
-      (is (evl '(labels ((fact (x) (if (= x 0)
+      (is (evl '(labels ((fact (x) (if (zerop x)
                                        1
                                        (* x (fact (1- x))))))
                  (fact 7))
@@ -115,6 +116,14 @@
                       (list 2)
                   (list :ok aa b&b 3))
                #'env)
-          '(:ok 2 nil 3)))))
+          '(:ok 2 nil 3))
+
+      (is (evl '(labels ((fib (n s)
+                          (if (>= (length s) n) s
+                              (fib n (cons (apply + (subseq s 0 2))
+                                           s)))))
+                  (reverse (fib 10 (list 1 0))))
+               #'env)
+          '(0 1 1 2 3 5 8 13 21 34)))))
 
 (unless (finalize) (error "error in test-evl"))
