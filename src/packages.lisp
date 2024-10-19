@@ -3,6 +3,7 @@
   (:nicknames #:cl-evl)
   (:export #:+std-env+ #:evl #:xprt
     #:evl #:evl* #:evl/env #:evl/extenv
+    #:~
     #:evl/do-cond
     #:evl/do-labels
     #:evl/do-let

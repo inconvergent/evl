@@ -138,15 +138,18 @@ env is a funcion used to lookup a variable in the local scope."
 
         ((car-is expr 'quote) (cadr expr)) ; don't evaluate
 
-        ; ((car-is expr 'cl-user::~)
-        ;  (eval
-        ;    `(multiple-value-call #'values ())
-        ;    ))
+        ((car-is-in expr '(cl-user::~ evl:~))
+         (eval
+           `(values-list
+              (concatenate 'list
+               ,@(mapcar (lambda (x) `(list ,@(multiple-value-list (evl x env))))
+                        (cdr expr)
+                        )))
+           ))
         ((car-is expr 'values)
          (eval `(values
                   ,@(mapcar (lambda (x) `(quote ,(evl x env)))
-                            (cdr expr))))
-         )
+                            (cdr expr)))))
 
         ; ((car-is expr 'cl-user::~)
         ;    (eval `(values

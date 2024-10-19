@@ -4,7 +4,7 @@
   (:use #:cl #:prove)
   (:import-from #:evl
     #:+std-env+
-    #:evl #:evl* #:car-is #:evl/extenv #:evl/eval-dsb #:evl/eval-lambda
+    #:evl #:evl* #:~ #:car-is #:evl/extenv #:evl/eval-dsb #:evl/eval-lambda
     #:dsb #:lmb #:lbl
     #:evl/do-labels #:evl/do-let #:evl/do-cond
     )
@@ -24,5 +24,6 @@
           finally (return (unless (< fails 1) (uiop:quit 7))))))
 
 (defun run-tests ()
-  (-run-tests '(#P"test/test-evl.lisp"
-                #P"test/test-evl-evl.lisp")))
+  (-run-tests '(#P"test/evl.lisp"
+                #P"test/evl-values.lisp"
+                #P"test/evl-self.lisp")))
