@@ -1,4 +1,13 @@
 
+; (defmacro lst (&body body)
+;   "get all (values ... ) in body as a list.
+; almost like multiple-value-list, except it handles multiple arguments."
+;   `(mvc #'list (~ ,@body)))
+; (defmacro from-lst (l) "return list as values. equivalent to (values-list ...)."
+;   `(values-list ,l))
+; (defmacro ~ (&rest rest) "wraps rest in (mvc #'values ...)."
+;   `(mvc #'values ,@rest))
+
 (defvar *exprs*
   '(
     ; (!f1 (f!@+ !f1 !f1))
@@ -18,8 +27,6 @@
     (!f2 (rnd:2in-circ 1.0))
     (!f2 (veq:f2 vx vy))
     (!f2 (veq:f2 x y))
-
-    ; (!f2 (2arr-mean !f2a))
 
     (!f2a (f2!@$* !f2a !f2))
     (!f2a (f2!@$*. !f2a !f1))

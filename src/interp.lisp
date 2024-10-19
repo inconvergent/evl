@@ -18,6 +18,9 @@
     (t . t) (= . =) (< . <) (> . >) (equal . equal)
     (atom . atom) (null . null) (evenp . evenp) (oddp . oddp)
     (pi . ,pi) (pii . ,(* 2.0 pi))
+    (mvc . multiple-value-call) (multiple-value-call . multiple-value-call)
+    ; (mvb . multiple-value-bind) (multiple-value-bind . multiple-value-bind)
+    (values . values)
     (stringp . stringp) (symbolp . symbolp) (keywordp . keywordp)
     (numberp . numberp) (functionp . functionp)
     (first . first) (last . last) (second . second) (third . third) (nth . nth)
@@ -131,7 +134,26 @@ env is a funcion used to lookup a variable in the local scope."
         ((keywordp expr) expr)
         ((symbolp expr) (funcall env expr)) ; get symbol from env
 
+        ((car-is-in expr '(declare)) nil)
+
         ((car-is expr 'quote) (cadr expr)) ; don't evaluate
+
+        ; ((car-is expr 'cl-user::~)
+        ;  (eval
+        ;    `(multiple-value-call #'values ())
+        ;    ))
+        ((car-is expr 'values)
+         (eval `(values
+                  ,@(mapcar (lambda (x) `(quote ,(evl x env)))
+                            (cdr expr))))
+         )
+
+        ; ((car-is expr 'cl-user::~)
+        ;    (eval `(values
+        ;      ,@(concatenate 'list
+        ;           (mapcar (lambda (x) (eval `(multiple-value-list ,(evl x env))))
+        ;                   (cdr expr)
+        ;                   )))))
 
         ((car-is expr 'progn) ; evaluate all exprs and return the last result
          (first (last (mapcar (lambda (e) (evl e env)) (cdr expr)))))

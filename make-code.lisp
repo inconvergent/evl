@@ -3,6 +3,7 @@
 
 (load "~/quicklisp/setup.lisp")
 (load "./gen.lisp")
+(ql:quickload :evl)
 (defvar *s* 1000.0)
 (defvar *m* (* 0.5 *s*))
 
@@ -36,7 +37,12 @@
                                       (init-pfx) (rnd-code *exprs* '!f2))))))
 
 (veq:fvdef main (fn)
-  (print (rnd-code *exprs* '!f2))
+  (veq:vpr (evl:evl*
+    ; (print (veq:replace-varg (veq:proc-vv (rnd-code *exprs* '!f2))))
+    ; '(~ 1 2 (~ 3 4 5 6))
+    ; '(~ 1 2 (~ 3 4 5))
+    '(values (+ 1 2) -2 -3)
+    ))
 
            )
 
