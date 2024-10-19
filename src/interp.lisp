@@ -116,17 +116,27 @@ requires that evl* implements (progn ...)"
   (declare (function env))
   "evaluate an EVL expression in env.
 
-supports quote, lambda (lmb), labels (lbl), let, destructuring-bind (dsb)
-  progn, if, cond.
-there is no function name space; variables and functions in environment are
-  indistinguishable.
-
-&optional, &key and &rest are supported as arguments in lambda, labels,
-  destructuring-bind. but default values in optional/key are not supported (yet),
-  so all defaults are nil.
-
 expr is the quoted expression that should be evaluated.
-env is a funcion used to lookup a variable in the local scope."
+env is a funcion used to lookup a variable in the local scope.
+
+supports CL syntax:
+  - progn, if, cond,
+  - lambda (lmb), labels (lbl),
+  - let, destructuring-bind (dsb),
+  - quote, values;
+non CL syntax:
+  - (~ ...) coerce value packs to a single pack
+
+deviations from regular CL syntax:
+  - there is no function name space; variables and functions in environment are
+    indistinguishable.
+  -
+  - &optional, &key and &rest are supported as arguments in lambda, labels,
+    destructuring-bind. but default values in optional/key are not supported (yet),
+    so all defaults are nil.
+  - &aux is not supported
+
+  "
   (cond ((null expr) expr)       ; explicitly eval atoms to themselves
         ((stringp expr) expr)
         ((numberp expr) expr)
@@ -138,25 +148,14 @@ env is a funcion used to lookup a variable in the local scope."
 
         ((car-is expr 'quote) (cadr expr)) ; don't evaluate
 
-        ((car-is-in expr '(cl-user::~ evl:~))
-         (eval
-           `(values-list
-              (concatenate 'list
-               ,@(mapcar (lambda (x) `(list ,@(multiple-value-list (evl x env))))
-                        (cdr expr)
-                        )))
-           ))
-        ((car-is expr 'values)
-         (eval `(values
-                  ,@(mapcar (lambda (x) `(quote ,(evl x env)))
-                            (cdr expr)))))
-
-        ; ((car-is expr 'cl-user::~)
-        ;    (eval `(values
-        ;      ,@(concatenate 'list
-        ;           (mapcar (lambda (x) (eval `(multiple-value-list ,(evl x env))))
-        ;                   (cdr expr)
-        ;                   )))))
+        ((car-is-in expr '(cl-user::~ evl:~)) ; coerce multiple value packs to one
+         (eval `(values-list
+                  (concatenate 'list
+                    ,@(mapcar (lambda (x) `(list ,@(multiple-value-list (evl x env))))
+                              (cdr expr))))))
+        ((car-is expr 'values) ; value pack
+         (eval `(values ,@(mapcar (lambda (x) `(quote ,(evl x env)))
+                                  (cdr expr)))))
 
         ((car-is expr 'progn) ; evaluate all exprs and return the last result
          (first (last (mapcar (lambda (e) (evl e env)) (cdr expr)))))
