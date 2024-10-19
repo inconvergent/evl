@@ -21,7 +21,7 @@
     (stringp . stringp) (symbolp . symbolp) (keywordp . keywordp)
     (numberp . numberp) (functionp . functionp)
     (first . first) (last . last) (second . second) (third . third) (nth . nth)
-    (mapcar . mapcar) (apply . apply)
+    (funcall . funcall) (mapcar . mapcar) (apply . apply)
     (find . find) (member . member) (union . union)
     (intersection . intersection) (set-difference . set-difference)
     (car . car) (cadr . cadr) (cdr . cdr) (cons . cons)
@@ -38,6 +38,11 @@
   "convenient standard environment functions for evl.
 none of them are required.")
 
+(defun new-env (&optional (kv +std-env+))
+  (declare (speed 3))
+  (lambda (k &aux (res (assoc k kv)))
+    (declare (symbol k))
+    (if res (cdr res) (error "[EVL] undefined variable: ~a" k))))
 
 (defun car-is-in (l ss)
   (declare (optimize (speed 3)) (list ss))
@@ -161,4 +166,7 @@ env is a funcion used to lookup a variable in the local scope."
                         (cdr expr))))
         (t (error "~&-->>~%[EVL]: invalid expression:~%  ~a <<--~&"
                   expr))))
+
+(defun evl* (expr &optional (env (new-env)))
+  (evl expr env))
 

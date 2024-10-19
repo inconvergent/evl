@@ -4,7 +4,7 @@
   (:use #:cl #:prove)
   (:import-from #:evl
     #:+std-env+
-    #:evl #:car-is #:evl/extenv #:evl/eval-dsb #:evl/eval-lambda
+    #:evl #:evl* #:car-is #:evl/extenv #:evl/eval-dsb #:evl/eval-lambda
     #:dsb #:lmb #:lbl
     #:evl/do-labels #:evl/do-let #:evl/do-cond
     )
