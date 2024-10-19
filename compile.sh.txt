@@ -1,0 +1,93 @@
+This is SBCL 2.4.4, an implementation of ANSI Common Lisp.
+More information about SBCL is available at <http://www.sbcl.org/>.
+
+SBCL is free software, provided as is, with absolutely no warranty.
+It is mostly in the public domain; some portions are provided under
+BSD-style licenses.  See the CREDITS and COPYING files in the
+distribution for more information.
+To load "evl":
+  Load 1 ASDF system:
+    evl
+; Loading "evl"
+; compiling file "/data/x/evl/src/packages.lisp" (written 29 OCT 2024 11:48:27 PM):
+[package evl].....................................
+[package evl/code]
+
+; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/packages-tmpGHU3ALSV.fasl
+; compilation finished in 0:00:00.002
+; compiling file "/data/x/evl/src/utils.lisp" (written 29 OCT 2024 11:48:27 PM):
+.
+; file: /data/x/evl/src/utils.lisp
+; in: DEFUN MATCH-PREF
+;     (STRING= EVL::PREF EVL::S :END2 (LENGTH EVL::PREF))
+; 
+; note: unable to
+;   optimize
+; due to type uncertainty:
+;   The first argument is a STRING, not a SIMPLE-BASE-STRING.
+;   The second argument is a STRING, not a SIMPLE-BASE-STRING.
+; 
+; note: unable to
+;   optimize
+; due to type uncertainty:
+;   The first argument is a STRING, not a (SIMPLE-ARRAY CHARACTER (*)).
+;   The second argument is a STRING, not a (SIMPLE-ARRAY CHARACTER (*)).
+
+
+; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/utils-tmpAAURSO1.fasl
+; compilation finished in 0:00:00.015
+; compiling file "/data/x/evl/src/docs.lisp" (written 29 OCT 2024 11:48:27 PM):
+.
+; file: /data/x/evl/src/docs.lisp
+; in: DEFVAR *DOCSTRING-MAP*
+;     (LIST)
+; 
+; note: deleting unreachable code
+
+
+; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/docs-tmp5GEXGEG5.fasl
+; compilation finished in 0:00:00.013
+; compiling file "/data/x/evl/src/config.lisp" (written 29 OCT 2024 11:48:27 PM):
+
+; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/config-tmpAR3FSGEY.fasl
+; compilation finished in 0:00:00.008
+; compiling file "/data/x/evl/src/evl-state-machine.lisp" (written 29 OCT 2024 11:51:22 PM):
+.
+
+; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/evl-state-machine-tmpJAIDFZTC.fasl
+; compilation finished in 0:00:00.012
+; compiling file "/data/x/evl/src/interp.lisp" (written 29 OCT 2024 11:48:27 PM):
+...
+
+; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/interp-tmp8V3J6PE9.fasl
+; compilation finished in 0:00:00.090
+; compiling file "/data/x/evl/src/code-factory.lisp" (written 29 OCT 2024 11:48:27 PM):
+
+; file: /data/x/evl/src/code-factory.lisp
+; in: DEFUN GEN
+;     (COND
+;      ((AND (LISTP EVL/CODE::V) (> (LENGTH EVL/CODE::V) 1))
+;       `(VALUES ,@EVL/CODE::V))
+;      ((LISTP EVL/CODE::V) (CAR EVL/CODE::V)) (T EVL/CODE::V))
+; --> IF THE 
+; ==>
+;   EVL/CODE::V
+; 
+; note: deleting unreachable code
+
+
+; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/code-factory-tmp9V47YWQF.fasl
+; compilation finished in 0:00:00.011
+; 
+; compilation unit finished
+;   printed 4 notes
+
+Evaluation took:
+  0.230 seconds of real time
+  0.230786 seconds of total run time (0.168899 user, 0.061887 system)
+  100.43% CPU
+  671 forms interpreted
+  1,081 lambdas converted
+  980,789,202 processor cycles
+  80,138,128 bytes consed
+  
