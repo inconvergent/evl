@@ -8,6 +8,7 @@
     (evl/eval-dsb . evl/eval-dsb)
     (evl/eval-mvb . evl/eval-mvb)
     (evl/eval-lambda . evl/eval-lambda)
+    (evl/eval-coerce-values . evl/eval-coerce-values)
     (evl/do-labels . evl/do-labels)
     (evl/do-let . evl/do-let)
     (evl/do-cond . evl/do-cond))
@@ -20,8 +21,7 @@
     (atom . atom) (null . null) (evenp . evenp) (oddp . oddp)
     (pi . ,pi) (pii . ,(* 2.0 pi))
     (mvc . multiple-value-call) (multiple-value-call . multiple-value-call)
-    ; (mvl . multiple-value-list) (multiple-value-list . multiple-value-list)
-    (values . values)
+    (values . values) (values-list . values-list)
     (stringp . stringp) (symbolp . symbolp) (keywordp . keywordp)
     (numberp . numberp) (functionp . functionp)
     (first . first) (last . last) (second . second) (third . third) (nth . nth)
@@ -87,7 +87,7 @@ requires that evl* implements (quote ...) and ((lambda ...) ...)."
    "get dsb argument values of (evl* in) as a list (l) of quoted values. then do:
 (evl* '((lambda (,@args*) expr) ,@lst))
 requires that evl* implements (quote ...) and ((lambda ...) ...)."
-  (funcall evl* `((lambda ,#1=(flat-arg-list args) ,@expr)
+  (funcall evl* `((lambda ,(flat-arg-list args) ,@expr)
                   ,@(mapcar (lambda (x) `(quote ,x))
                             (multiple-value-list (funcall evl* in env*))))
            env*))
@@ -98,8 +98,7 @@ requires that evl* implements (quote ...) and ((lambda ...) ...)."
 requires that evl* implements (progn ...)"
   (eval `(lambda (,@args)
            (funcall ,evl* '(progn ,@body)
-             (evl/extenv ,env* ',(flat-arg-list args)
-                                 (list ,@(flat-arg-list args)))))))
+             (evl/extenv ,env* ',#1=(flat-arg-list args) (list ,@#1#))))))
 
 (defun evl/do-labels (pairs body evl* env*)
   (declare (list body) (function evl* env*))
@@ -120,6 +119,13 @@ requires that evl* implements (progn ...)"
   (declare (list body) (function evl* env*))
   "recursively evaluate these conds."
   (funcall evl* `(if ,cnd ,x (cond ,@body)) env*))
+
+(defun evl/eval-coerce-values (expr evl* env*)
+  (eval `(values-list
+           (concatenate 'list
+            ,@(mapcar (lambda (x) `(list ,@(multiple-value-list
+                                             (funcall evl* x env*))))
+                      expr)))))
 
 ; TODO: optional symbol pass through
 ; TODO: &optional defaults does not work. see flat-arg-list
@@ -159,18 +165,15 @@ deviations from regular CL syntax:
         ((car-is expr 'quote) (cadr expr))                   ; don't evaluate
 
         ((car-is-in expr '(cl-user::~ evl:~ veq:~))          ; coerce value packs
-         (eval `(values-list
-                  (concatenate 'list
-                    ,@(mapcar (lambda (x) `(list ,@(multiple-value-list
-                                                     (evl x env))))
-                              (cdr expr))))))
+         (evl/eval-coerce-values (cdr expr) #'evl env))
+
         ((car-is expr 'values)                               ; values
          (apply #'values (mapcar (lambda (x) (evl x env))
                                  (cdr expr))))
 
         ((car-is expr 'progn) ; evaluate all exprs and return the last result
          (destructuring-bind (a &rest rest) (cdr expr)
-           (if rest (progn (evl a env) (evl `(progn ,@rest) env))
+           (if rest (progn (evl a env) (evl (cons 'progn rest) env))
                     (evl a env))))
 
         ((car-is expr 'if)                                   ; if
@@ -191,7 +194,7 @@ deviations from regular CL syntax:
         ((car-is-in expr '(multiple-value-bind mvb veq:mvb)) ; mvb
          (destructuring-bind (vars in &rest rest) (cdr expr)
            (evl/eval-mvb vars in rest #'evl env)))
-        ((car-is-in expr '(multiple-value-list mvl)) ; mvl
+        ((car-is-in expr '(multiple-value-list mvl))         ; mvl
          (multiple-value-list (evl (cadr expr) env)))
 
         ((car-is expr 'cond)                                 ; if else-if ... else

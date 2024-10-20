@@ -11,6 +11,7 @@
     #:evl/eval-dsb
     #:evl/eval-mvb
     #:evl/eval-lambda
+    #:evl/eval-coerce-values
     #:car-is #:car-is-in
     #:dsb #:lbl #:lmb #:mvb #:mvl))
 
