@@ -20,7 +20,7 @@
     (atom . atom) (null . null) (evenp . evenp) (oddp . oddp)
     (pi . ,pi) (pii . ,(* 2.0 pi))
     (mvc . multiple-value-call) (multiple-value-call . multiple-value-call)
-    ; (mvb . multiple-value-bind) (multiple-value-bind . multiple-value-bind)
+    ; (mvl . multiple-value-list) (multiple-value-list . multiple-value-list)
     (values . values)
     (stringp . stringp) (symbolp . symbolp) (keywordp . keywordp)
     (numberp . numberp) (functionp . functionp)
@@ -46,11 +46,7 @@ none of them are required.")
   (declare (speed 3))
   (lambda (k &aux (res (assoc k kv)))
     (declare (symbol k))
-    (if res (cdr res) (let ((*print-case* :downcase)
-                            (*print-gensym* nil)
-                            (*print-escape* t)
-                            )
-                       (error "[EVL] undefined variable: ~a" k)))))
+    (if res (cdr res) (error "[EVL] undefined variable: ~a" k))))
 
 (defun car-is-in (l ss)
   (declare (optimize (speed 3)) (list ss))
@@ -92,11 +88,8 @@ requires that evl* implements (quote ...) and ((lambda ...) ...)."
 (evl* '((lambda (,@args*) expr) ,@lst))
 requires that evl* implements (quote ...) and ((lambda ...) ...)."
   (funcall evl* `((lambda ,#1=(flat-arg-list args) ,@expr)
-                  ; quote the elements in the list. so they will not be  evaluated by evl*
                   ,@(mapcar (lambda (x) `(quote ,x))
-                      ; use CL dsb to get variables as a list
-                      (eval `(destructuring-bind ,args ',(funcall evl* in env*)
-                               (list ,@#1#)))))
+                            (multiple-value-list (funcall evl* in env*))))
            env*))
 
 (defun evl/eval-lambda (args body evl* env*)
@@ -153,7 +146,6 @@ deviations from regular CL syntax:
     destructuring-bind. but default values in optional/key are not supported (yet),
     so all defaults are nil.
   - &aux is not supported
-
   "
   (cond ((null expr) expr)       ; explicitly eval atoms to themselves
         ((stringp expr) expr)
@@ -169,14 +161,17 @@ deviations from regular CL syntax:
         ((car-is-in expr '(cl-user::~ evl:~ veq:~)) ; coerce multiple value packs to one
          (eval `(values-list
                   (concatenate 'list
-                    ,@(mapcar (lambda (x) `(list ,@(multiple-value-list (evl x env))))
+                    ,@(mapcar (lambda (x) `(list ,@(multiple-value-list
+                                                     (evl x env))))
                               (cdr expr))))))
         ((car-is expr 'values) ; value pack
-         (eval `(values ,@(mapcar (lambda (x) `(quote ,(evl x env)))
-                                  (cdr expr)))))
+         (apply #'values (mapcar (lambda (x) (evl x env))
+                                 (cdr expr))))
 
         ((car-is expr 'progn) ; evaluate all exprs and return the last result
-         (first (last (mapcar (lambda (e) (evl e env)) (cdr expr)))))
+         (destructuring-bind (a &rest rest) (cdr expr)
+           (if rest (progn (evl a env) (evl `(progn ,@rest) env))
+                    (evl a env))))
 
         ((car-is expr 'if) ; if
          (destructuring-bind (test then &optional else) (cdr expr)
@@ -213,5 +208,5 @@ deviations from regular CL syntax:
                   expr))))
 
 (defun evl* (expr &optional (env (new-env)))
-  (evl expr env))
+  (veq:~ (evl expr env)))
 

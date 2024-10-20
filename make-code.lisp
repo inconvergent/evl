@@ -18,20 +18,36 @@
 
   (let* ((code (rnd-code *exprs* '!f2))
         (vv (veq:proc-vv code))
-        (expanded-args (veq:replace-varg vv))
+        (expanded-expr (veq:replace-varg vv))
         )
     (lqn:out code)
     (lqn:out "---")
-    (lqn:out expanded-args)
     (lqn:out "---")
-   (evl:evl* expanded-args
+   (veq:vpr  (evl:evl* expanded-expr
              (evl:new-env `((x . 1.0) (y . 2.0)
                             (vx . 3.0) (vy . 4.0)
                             ,@evl:+std-env+))
     ))
 
-           )
+   ; (veq:vpr (evl:evl* '(multiple-value-bind (a b c)
+   ;                       (values 1 2 (values 3 4)) (list b a c))))
 
+   ; (veq:vpr (evl:evl* '))
+   ;   (veq:vpr (funcall (evl:evl* '(lambda () (values 1 2 3))
+   ;                                        )))
+   ))
+
+
+
+; (let ((a 1)
+;       (b 2))
+;   (list b a))
+
+; ; ==
+
+; ((lambda (a b)
+;    (list b a))
+;  1 2)
 
 (main (or (second (auxin:cmd-args)) "tmp"))
 
