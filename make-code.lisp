@@ -29,8 +29,9 @@
                             ,@evl:+std-env+))
     ))
 
-   ; (veq:vpr (evl:evl* '(multiple-value-bind (a b c)
-   ;                       (values 1 2 (values 3 4)) (list b a c))))
+   ; (veq:vpr (evl:evl* '(multiple-value-list (multiple-value-bind (a b c)
+   ;                       (values 1 2 (values 3 4)) (list b a c)))))
+   (veq:vpr (evl:evl* '(multiple-value-list (values 1 2 (values 3 4)))))
 
    ; (veq:vpr (evl:evl* '))
    ;   (veq:vpr (funcall (evl:evl* '(lambda () (values 1 2 3))

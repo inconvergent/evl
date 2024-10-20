@@ -12,5 +12,5 @@
     #:evl/eval-mvb
     #:evl/eval-lambda
     #:car-is #:car-is-in
-    #:dsb #:lbl #:lmb))
+    #:dsb #:lbl #:lmb #:mvb #:mvl))
 

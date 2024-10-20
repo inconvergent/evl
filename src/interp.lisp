@@ -147,24 +147,24 @@ deviations from regular CL syntax:
     so all defaults are nil.
   - &aux is not supported
   "
-  (cond ((null expr) expr)       ; explicitly eval atoms to themselves
+  (cond ((null expr) expr)                                   ; eval atoms to themselves
         ((stringp expr) expr)
         ((numberp expr) expr)
         ((functionp expr) expr)
         ((keywordp expr) expr)
-        ((symbolp expr) (funcall env expr)) ; get symbol from env
+        ((symbolp expr) (funcall env expr))                  ; get var from env
 
         ((car-is-in expr '(declare)) nil)
 
-        ((car-is expr 'quote) (cadr expr)) ; don't evaluate
+        ((car-is expr 'quote) (cadr expr))                   ; don't evaluate
 
-        ((car-is-in expr '(cl-user::~ evl:~ veq:~)) ; coerce multiple value packs to one
+        ((car-is-in expr '(cl-user::~ evl:~ veq:~))          ; coerce value packs
          (eval `(values-list
                   (concatenate 'list
                     ,@(mapcar (lambda (x) `(list ,@(multiple-value-list
                                                      (evl x env))))
                               (cdr expr))))))
-        ((car-is expr 'values) ; value pack
+        ((car-is expr 'values)                               ; values
          (apply #'values (mapcar (lambda (x) (evl x env))
                                  (cdr expr))))
 
@@ -173,34 +173,36 @@ deviations from regular CL syntax:
            (if rest (progn (evl a env) (evl `(progn ,@rest) env))
                     (evl a env))))
 
-        ((car-is expr 'if) ; if
+        ((car-is expr 'if)                                   ; if
          (destructuring-bind (test then &optional else) (cdr expr)
            (if (evl test env) (evl then env) (evl else env))))
 
-        ((car-is-in expr '(lambda lmb)) ; lambda
+        ((car-is-in expr '(lambda lmb))                      ; lambda
          (destructuring-bind (kk &rest rest) (cdr expr)
            (evl/eval-lambda kk rest #'evl env)))
 
-        ((car-is expr 'let) ; define local vars
+        ((car-is expr 'let)                                  ; let; define local vars
          (destructuring-bind (vars &rest body) (cdr expr)
            (evl/do-let vars body #'evl env)))
 
-        ((car-is-in expr '(destructuring-bind dsb)) ; dsb
+        ((car-is-in expr '(destructuring-bind dsb))          ; dsb
          (destructuring-bind (vars in &rest rest) (cdr expr)
            (evl/eval-dsb vars in rest #'evl env)))
         ((car-is-in expr '(multiple-value-bind mvb veq:mvb)) ; mvb
          (destructuring-bind (vars in &rest rest) (cdr expr)
            (evl/eval-mvb vars in rest #'evl env)))
+        ((car-is-in expr '(multiple-value-list mvl)) ; mvl
+         (multiple-value-list (evl (cadr expr) env)))
 
-        ((car-is expr 'cond) ; if else-if ... else
+        ((car-is expr 'cond)                                 ; if else-if ... else
          (destructuring-bind ((cnd x) &rest rest) (cdr expr)
            (evl/do-cond cnd x rest #'evl env)))
 
-        ((car-is-in expr '(labels lbl)) ; define local functions
+        ((car-is-in expr '(labels lbl))                      ; labels; local functions
          (destructuring-bind (pairs &rest body) (cdr expr)
            (evl/do-labels pairs body #'evl env)))
 
-        ((consp expr) ; (apply fx/lambda ...)
+        ((consp expr)                                        ; (apply (fx/lambda) ...)
          (apply (evl (car expr) env)
                 (mapcar (lambda (x) (evl x env))
                         (cdr expr))))
@@ -208,5 +210,5 @@ deviations from regular CL syntax:
                   expr))))
 
 (defun evl* (expr &optional (env (new-env)))
-  (veq:~ (evl expr env)))
+  (evl expr env))
 

@@ -5,7 +5,7 @@
   (:import-from #:evl
     #:+std-env+
     #:evl #:evl* #:~ #:car-is #:evl/extenv #:evl/eval-dsb #:evl/eval-lambda
-    #:dsb #:lmb #:lbl
+    #:dsb #:lmb #:lbl #:mvl #:mvb
     #:evl/do-labels #:evl/do-let #:evl/do-cond
     )
   (:export #:run-tests))
