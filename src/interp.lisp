@@ -6,6 +6,7 @@
   '((car-is . car-is) ' (car-is-in . car-is-in)
     (evl/extenv . evl/extenv)
     (evl/eval-dsb . evl/eval-dsb)
+    (evl/eval-mvb . evl/eval-mvb)
     (evl/eval-lambda . evl/eval-lambda)
     (evl/do-labels . evl/do-labels)
     (evl/do-let . evl/do-let)
@@ -45,7 +46,11 @@ none of them are required.")
   (declare (speed 3))
   (lambda (k &aux (res (assoc k kv)))
     (declare (symbol k))
-    (if res (cdr res) (error "[EVL] undefined variable: ~a" k))))
+    (if res (cdr res) (let ((*print-case* :downcase)
+                            (*print-gensym* nil)
+                            (*print-escape* t)
+                            )
+                       (error "[EVL] undefined variable: ~a" k)))))
 
 (defun car-is-in (l ss)
   (declare (optimize (speed 3)) (list ss))
@@ -69,6 +74,19 @@ none of them are required.")
              (flatten args)))
 
 (defun evl/eval-dsb (args in expr evl* env*)
+  (declare (list args) (function evl* env*))
+   "get dsb argument values of (evl* in) as a list (l) of quoted values. then do:
+(evl* '((lambda (,@args*) expr) ,@lst))
+requires that evl* implements (quote ...) and ((lambda ...) ...)."
+  (funcall evl* `((lambda ,#1=(flat-arg-list args) ,@expr)
+                  ; quote the elements in the list. so they will not be  evaluated by evl*
+                  ,@(mapcar (lambda (x) `(quote ,x))
+                      ; use CL dsb to get variables as a list
+                      (eval `(destructuring-bind ,args ',(funcall evl* in env*)
+                               (list ,@#1#)))))
+           env*))
+
+(defun evl/eval-mvb (args in expr evl* env*)
   (declare (list args) (function evl* env*))
    "get dsb argument values of (evl* in) as a list (l) of quoted values. then do:
 (evl* '((lambda (,@args*) expr) ,@lst))
@@ -148,7 +166,7 @@ deviations from regular CL syntax:
 
         ((car-is expr 'quote) (cadr expr)) ; don't evaluate
 
-        ((car-is-in expr '(cl-user::~ evl:~)) ; coerce multiple value packs to one
+        ((car-is-in expr '(cl-user::~ evl:~ veq:~)) ; coerce multiple value packs to one
          (eval `(values-list
                   (concatenate 'list
                     ,@(mapcar (lambda (x) `(list ,@(multiple-value-list (evl x env))))
@@ -175,6 +193,9 @@ deviations from regular CL syntax:
         ((car-is-in expr '(destructuring-bind dsb)) ; dsb
          (destructuring-bind (vars in &rest rest) (cdr expr)
            (evl/eval-dsb vars in rest #'evl env)))
+        ((car-is-in expr '(multiple-value-bind mvb veq:mvb)) ; mvb
+         (destructuring-bind (vars in &rest rest) (cdr expr)
+           (evl/eval-mvb vars in rest #'evl env)))
 
         ((car-is expr 'cond) ; if else-if ... else
          (destructuring-bind ((cnd x) &rest rest) (cdr expr)
