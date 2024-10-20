@@ -115,6 +115,8 @@
                       (list 2)
                   (list :ok aa b&b 3))
                #'env)
-          '(:ok 2 nil 3)))))
+          '(:ok 2 nil 3))
+
+      )))
 
 (unless (finalize) (error "error in test-evl"))

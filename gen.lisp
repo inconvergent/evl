@@ -1,0 +1,92 @@
+
+; (defmacro lst (&body body)
+;   "get all (values ... ) in body as a list.
+; almost like multiple-value-list, except it handles multiple arguments."
+;   `(mvc #'list (~ ,@body)))
+; (defmacro from-lst (l) "return list as values. equivalent to (values-list ...)."
+;   `(values-list ,l))
+; (defmacro ~ (&rest rest) "wraps rest in (mvc #'values ...)."
+;   `(mvc #'values ,@rest))
+
+(defvar *exprs*
+  '(
+    ; (!f1 (f!@+ !f1 !f1))
+    ; (!f1 (f!@* !f1 !f1))
+    ; (!f1 (f!@- !f1 !f1))
+    (!f1 x) (!f1 y)
+    (!f1 vx) (!f1 vy)
+    ; (!f1 (f.@rnd !f1))
+    ; (!f1 (rnd:rnd* 1.0))
+    (!f2 (f2!@* !f2 !f2))
+    (!f2 (f2!@*. !f2 !f1))
+    ; (!f2 (f2!@+ !f2 !f2))
+    ; (!f2 (f2!@+. !f2 !f1))
+    ; (!f2 (f2!@- !f2 !f2))
+    ; (!f2 (f2!@-. !f2 !f1))
+    ; (!f2 (rnd:2in-circ !f1))
+    ; (!f2 (rnd:2in-circ 1.0))
+    ; (!f2 (veq:f2 vx vy))
+    ; (!f2 (veq:f2 x y))
+
+    ; (!f2a (f2!@$* !f2a !f2))
+    ; (!f2a (f2!@$*. !f2a !f1))
+    ; (!f2a (f2!@$+ !f2a !f2))
+    ; (!f2a (f2!@$+. !f2a !f1))
+    ; (!f2a (f2!@$- !f2a !f2))
+    ; (!f2a (f2!@$-. !f2a !f1))
+    ; (!f2a all-pos)
+    ; (!f2a all-vel)
+
+    (@f1 'vx)
+    (@f1 'vy)
+    (@f1 'x)
+    (@f1 'y)
+    ; (@f1 (rnd:rnd* 1.0))
+    ; (@f2 (rnd:2in-circ 1.0))
+    (@f2 (values 'vx 'vy))
+    (@f2 (values 'x 'y))
+    ; (@f2a 'all-vel)
+    ; (@f2a 'all-pos)
+    ))
+
+(defun init-pfx () '(f2!@+ x y vx vy))
+
+(veq:fvdef trunc (v &optional (s 10000.0)) (veq:fclamp* v (- s) s))
+(defun rnd (a &aux (a* (abs a)))
+  (if (zerop a*) 0f0 (rnd:rnd* a*)))
+
+
+(defun make-sign-map (exprs &aux (ht (make-hash-table :test #'equal)))
+  (labels ((add-fx (s fx-args)
+             (setf (gethash s ht) (push fx-args (gethash s ht (list))))))
+    (lqn:qry exprs #((add-fx (car _) (second _))))
+    ht))
+
+(defun !signs (c) (and (symbolp c) (lqn:pref? (lqn:str! c) "!")))
+
+(defun @resym (s) (lqn:sym! "@" (lqn:seq (lqn:str! s) 1)))
+
+(defun rnd-code (exprs s &aux (signs (make-sign-map exprs)))
+  (labels ((do-eval (c)
+              (handler-case (eval `(veq:fvprogn ,(rnd:rndget (gethash (@resym c) signs))))
+                (error (e) (error "DO-EVAL ERROR for ~a:~%  err:~%  ~a" c e))))
+           (eval-values (c &aux (v (veq:lst (do-eval c))))
+             (cond ((and (listp v) (> (length v) 1)) `(values ,@v))
+                   ((listp v) (car v))
+                   (t v)))
+           (rec (c &optional (d 0))
+             (cond ((> d 10) c)
+                   ((null c) c)
+                   ((!signs c) (rec (rnd:rndget (gethash c signs)) (1+ d)))
+                   ((symbolp c) c) ((numberp c) c) ((vectorp c) c)
+                   ((listp c) (cons (rec (car c) (1+ d))
+                                    (rec (cdr c) (1+ d))))))
+             (rec2 (c)
+             (cond ((null c) c)
+                   ((!signs c) (eval-values c))
+                   ((symbolp c) c) ((numberp c) c) ((vectorp c) c)
+                   ((listp c) (cons (rec2 (car c))
+                                    (rec2 (cdr c)))))))
+    ; (print (@resym '!abc))
+    (rec2 (rec (rnd:rndget (gethash s signs))))))
+
