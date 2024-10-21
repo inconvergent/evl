@@ -4,7 +4,7 @@
 
 (let ((kv `((mfx . ,(lambda (x) (* 1000 x)))
             (xx . 12) (yy . 13)
-            ,@evl:+std-env+)))
+            ,@evl:+full-env+)))
 
 (subtest "evl-evl"
   (labels ((env (x) (let ((res (assoc x kv)))
@@ -18,11 +18,11 @@
               (evl. (expr env.)
                 ; simplified implementation of EVL in EVL
                 (cond ((null expr) expr)
-                      ((stringp expr) expr)
-                      ((numberp expr) expr)
-                      ((functionp expr) expr)
-                      ((keywordp expr) expr)
-                      ((symbolp expr) (env. expr))
+                      ((str? expr) expr)
+                      ((num? expr) expr)
+                      ((function? expr) expr)
+                      ((keyword? expr) expr)
+                      ((symbol? expr) (env. expr))
 
                       ((evl/car-is expr 'quote) (cadr expr))
 
@@ -31,7 +31,7 @@
                          (if rest (progn (evl. a env.) (evl. (cons 'progn rest) env.))
                                   (evl. a env.))))
 
-                      ((evl/car-is expr 'dsb*)
+                      ((evl/car-is expr 'dsb*) ; SIC
                        (dsb (vars in &rest rest) (cdr expr)
                          (evl/eval-dsb vars in rest evl. env.)))
 
@@ -47,7 +47,7 @@
                        (dsb (kk &rest rest) (cdr expr)
                          (evl/eval-lambda kk rest evl. env.)))
 
-                      ((evl/car-is expr 'labels*)
+                      ((evl/car-is expr 'labels*) ; SIC
                        (dsb (pairs &rest body) (cdr expr)
                          (evl/do-labels pairs body evl. env.)))
 
@@ -55,9 +55,9 @@
                        (dsb (vars &rest body) (cdr expr)
                          (evl/do-let vars body evl. env.)))
 
-                      ((consp expr)
+                      ((cons? expr)
                        (apply (evl. (car expr) env.)
-                              (mapcar (lambda (x) (evl. x env.))
+                              (mapcar (lmb (x) (evl. x env.))
                                       (cdr expr)))))))
              (list (evl. 'xx env.)
                    (evl. 'yy env.)

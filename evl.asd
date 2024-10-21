@@ -7,7 +7,8 @@
   :depends-on (#:lqn #:veq)
   :components ((:file "packages")
                (:file "utils" :depends-on ("packages"))
-               (:file "interp" :depends-on ("utils"))))
+               (:file "config" :depends-on ("utils"))
+               (:file "interp" :depends-on ("config"))))
 
 (asdf:defsystem #:evl/tests
   :depends-on (#:prove #:uiop #:asdf #:evl #:lqn #:veq)

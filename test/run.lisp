@@ -3,11 +3,17 @@
 (defpackage #:evl-tests
   (:use #:cl #:prove)
   (:import-from #:evl
-    #:+std-env+
-    #:evl #:evl* #:~ #:evl/car-is #:evl/extenv #:evl/eval-dsb #:evl/eval-lambda
-    #:dsb #:lmb #:lbl #:mvl #:mvb
-    #:evl/do-labels #:evl/do-let #:evl/do-cond
-    )
+    #:+std-env+ #:+full-env+
+    #:evl #:evl*
+    ; language
+    #:str? #:num? #:function? #:keyword? #:symbol? #:null? #:list? #:cons?
+    #:~ #:dsb #:lbl #:lmb #:mvb #:mvl
+    ; utils
+    #:evl #:evl*
+    #:evl/env #:evl/extenv #:new-env
+    #:evl/do-cond #:evl/do-labels #:evl/do-let
+    #:evl/eval-dsb #:evl/eval-mvb #:evl/eval-lambda #:evl/eval-coerce-values
+    #:evl/car-is #:evl/car-is-in)
   (:export #:run-tests))
 (in-package #:evl-tests)
 
