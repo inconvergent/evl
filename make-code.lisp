@@ -18,12 +18,19 @@
     (veq:vpr (evl:evl* expanded-expr
                (evl:new-env `((x . 1.0) (y . 2.0)
                               (vx . 3.0) (vy . 4.0)
+                              (b . 3)
                               ,@evl:+std-env+))))
 
-    (veq:vpr (evl:evl*
-               '(+
-                 1 (evl:evl* '1)
-                 )))
+    (veq:vpr (evl:evl
+               '(let ((a 1)
+                      (b 77)
+                      )
+                  (+ a (evl:evl b)))
+               (evl:new-env `((x . 1.0) (y . 2.0)
+                              (vx . 3.0) (vy . 4.0)
+                              (b . 3)
+                              ,@evl:+std-env+))
+               ))
     ))
 
 (main)

@@ -3,10 +3,8 @@
 ; TODO: argument count guards
 
 (defparameter +evl-env+
-  `((car-is . car-is) ' (car-is-in . car-is-in)
+  `((evl/car-is . evl/car-is) (evl/car-is-in . evl/car-is-in)
     (evl/extenv . evl/extenv)
-    (evl* . evl*)
-    (evl . evl)
     (evl/eval-dsb . evl/eval-dsb)
     (evl/eval-mvb . evl/eval-mvb)
     (evl/eval-lambda . evl/eval-lambda)
@@ -50,10 +48,10 @@ none of them are required.")
     (declare (symbol k))
     (if res (cdr res) (error "[EVL] undefined variable: ~a" k))))
 
-(defun car-is-in (l ss)
+(defun evl/car-is-in (l ss)
   (declare (optimize (speed 3)) (list ss))
   (and (consp l) (member (car l) ss :test #'eq)))
-(defun car-is (l s)
+(defun evl/car-is (l s)
   (declare (optimize (speed 3)) (symbol s))
   "t if consp and car is s"
   (and (consp l) (equal (car l) s)))
@@ -155,59 +153,61 @@ deviations from regular CL syntax:
     so all defaults are nil.
   - &aux is not supported
   "
-  (cond ((null expr) expr)                                   ; eval atoms to themselves
+  (cond ((null expr) expr)                                       ; eval atoms to themselves
         ((stringp expr) expr)
         ((numberp expr) expr)
         ((functionp expr) expr)
         ((keywordp expr) expr)
-        ((symbolp expr) (funcall env expr))                  ; get var from env
+        ((symbolp expr) (funcall env expr))                      ; get var from env
 
-        ((car-is-in expr '(declare)) nil)
+        ((evl/car-is-in expr '(declare)) nil)                    ; ignore declares
 
-        ((car-is expr 'quote) (cadr expr))                   ; don't evaluate
+        ((evl/car-is expr 'quote) (cadr expr))                   ; quote; don't evaluate
 
-        ((car-is-in expr '(cl-user::~ evl:~ veq:~))          ; coerce value packs
+        ; ((evl/car-is expr 'evl) (evl (print (cadr expr)) env)) ; evl?
+
+        ((evl/car-is-in expr '(cl-user::~ evl:~ veq:~))          ; coerce value packs
          (evl/eval-coerce-values (cdr expr) #'evl env))
 
-        ((car-is expr 'values)                               ; values
+        ((evl/car-is expr 'values)                               ; values
          (apply #'values (mapcar (lambda (x) (evl x env))
                                  (cdr expr))))
 
-        ((car-is expr 'progn) ; evaluate all exprs and return the last result
+        ((evl/car-is expr 'progn)                                ; progn; evaluate all, return last
          (destructuring-bind (a &rest rest) (cdr expr)
            (if rest (progn (evl a env) (evl (cons 'progn rest) env))
                     (evl a env))))
 
-        ((car-is expr 'if)                                   ; if
-         (destructuring-bind (test then &optional else) (cdr expr)
-           (if (evl test env) (evl then env) (evl else env))))
-
-        ((car-is-in expr '(lambda lmb))                      ; lambda
+        ((evl/car-is-in expr '(lambda lmb))                      ; lambda
          (destructuring-bind (kk &rest rest) (cdr expr)
            (evl/eval-lambda kk rest #'evl env)))
 
-        ((car-is expr 'let)                                  ; let; define local vars
+        ((evl/car-is expr 'let)                                  ; let; define local vars
          (destructuring-bind (vars &rest body) (cdr expr)
            (evl/do-let vars body #'evl env)))
 
-        ((car-is-in expr '(destructuring-bind dsb))          ; dsb
-         (destructuring-bind (vars in &rest rest) (cdr expr)
-           (evl/eval-dsb vars in rest #'evl env)))
-        ((car-is-in expr '(multiple-value-bind mvb veq:mvb)) ; mvb
-         (destructuring-bind (vars in &rest rest) (cdr expr)
-           (evl/eval-mvb vars in rest #'evl env)))
-        ((car-is-in expr '(multiple-value-list mvl))         ; mvl
-         (multiple-value-list (evl (cadr expr) env)))
+        ((evl/car-is expr 'if)                                   ; if
+         (destructuring-bind (test then &optional else) (cdr expr)
+           (if (evl test env) (evl then env) (evl else env))))
 
-        ((car-is expr 'cond)                                 ; if else-if ... else
+        ((evl/car-is expr 'cond)                                 ; if else-if ... else
          (destructuring-bind ((cnd x) &rest rest) (cdr expr)
            (evl/do-cond cnd x rest #'evl env)))
 
-        ((car-is-in expr '(labels lbl))                      ; labels; local functions
+        ((evl/car-is-in expr '(destructuring-bind dsb))          ; dsb
+         (destructuring-bind (vars in &rest rest) (cdr expr)
+           (evl/eval-dsb vars in rest #'evl env)))
+        ((evl/car-is-in expr '(multiple-value-bind mvb veq:mvb)) ; mvb
+         (destructuring-bind (vars in &rest rest) (cdr expr)
+           (evl/eval-mvb vars in rest #'evl env)))
+        ((evl/car-is-in expr '(multiple-value-list mvl))         ; mvl
+         (multiple-value-list (evl (cadr expr) env)))
+
+        ((evl/car-is-in expr '(labels lbl))                      ; labels; local functions
          (destructuring-bind (pairs &rest body) (cdr expr)
            (evl/do-labels pairs body #'evl env)))
 
-        ((consp expr)                                        ; (apply (fx/lambda) ...)
+        ((consp expr)                                            ; (apply (fx/lambda) ...)
          (apply (evl (car expr) env)
                 (mapcar (lambda (x) (evl x env))
                         (cdr expr))))

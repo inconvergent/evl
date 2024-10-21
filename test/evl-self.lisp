@@ -4,18 +4,19 @@
 
 (let ((kv `((mfx . ,(lambda (x) (* 1000 x)))
             (xx . 12) (yy . 13)
-            ,@+std-env+)))
+            ,@evl:+std-env+)))
 
 (subtest "evl-evl"
   (labels ((env (x) (let ((res (assoc x kv)))
                       (if res (cdr res)
                               (error "[EVL]: undefined variable: ~a" x)))))
-    (is (evl
+    (is (evl:evl
           `(labels
              ((env. (x) (let ((res (assoc x '((yy . 13000) ,@kv))))
                           (if res (cdr res)
                                   (error "[*EVL*]: undefined variable: ~a" x))))
               (evl. (expr env.)
+                ; simplified implementation of EVL in EVL
                 (cond ((null expr) expr)
                       ((stringp expr) expr)
                       ((numberp expr) expr)
@@ -23,33 +24,34 @@
                       ((keywordp expr) expr)
                       ((symbolp expr) (env. expr))
 
-                      ((car-is expr 'quote) (cadr expr))
+                      ((evl/car-is expr 'quote) (cadr expr))
 
-                      ((car-is expr 'progn)
-                       (first (last (mapcar (lambda (e) (evl. e env.))
-                                            (cdr expr)))))
+                      ((evl/car-is expr 'progn)
+                       (destructuring-bind (a &rest rest) (cdr expr)
+                         (if rest (progn (evl. a env.) (evl. (cons 'progn rest) env.))
+                                  (evl. a env.))))
 
-                      ((car-is expr 'dsb*)
+                      ((evl/car-is expr 'dsb*)
                        (dsb (vars in &rest rest) (cdr expr)
                          (evl/eval-dsb vars in rest evl. env.)))
 
-                      ((car-is expr 'if)
+                      ((evl/car-is expr 'if)
                        (dsb (test then &optional else) (cdr expr)
                          (if (evl. test env.) (evl. then env.) (evl. else env.))))
 
-                      ((car-is expr 'cond)
+                      ((evl/car-is expr 'cond)
                        (dsb ((cnd x) &rest rest) (cdr expr)
                          (evl/do-cond cnd x rest evl. env.)))
 
-                      ((car-is expr 'lambda)
+                      ((evl/car-is expr 'lambda)
                        (dsb (kk &rest rest) (cdr expr)
                          (evl/eval-lambda kk rest evl. env.)))
 
-                      ((car-is expr 'labels)
+                      ((evl/car-is expr 'labels*)
                        (dsb (pairs &rest body) (cdr expr)
                          (evl/do-labels pairs body evl. env.)))
 
-                      ((car-is expr 'let)
+                      ((evl/car-is expr 'let)
                        (dsb (vars &rest body) (cdr expr)
                          (evl/do-let vars body evl. env.)))
 
@@ -65,9 +67,9 @@
                    (evl. '(mfx xx) env.)
                    (evl. '(mfx yy) env.)
                    (evl. '((lambda (x) x) :val) env.)
-                   (evl. '(labels ((add0 (x) (add1 (sub1 x)))
-                                   (add1 (x) (1+ x))
-                                   (sub1 (x) (1- x)))
+                   (evl. '(labels* ((add0 (x) (add1 (sub1 x)))
+                                    (add1 (x) (1+ x))
+                                    (sub1 (x) (1- x)))
                             (add0 7)) env.)
                    (evl. '(cond ((< 1 2) :yes)) env.)
                    (evl. '(cond ((< 2 1) :yes) ((> 2 1) :no)) env.)
