@@ -3,8 +3,10 @@
 ; TODO: argument count guards
 
 (defparameter +evl-env+
-  '((car-is . car-is) ' (car-is-in . car-is-in)
+  `((car-is . car-is) ' (car-is-in . car-is-in)
     (evl/extenv . evl/extenv)
+    (evl* . evl*)
+    (evl . evl)
     (evl/eval-dsb . evl/eval-dsb)
     (evl/eval-mvb . evl/eval-mvb)
     (evl/eval-lambda . evl/eval-lambda)
@@ -19,7 +21,7 @@
     (+ . +) (- . -) (/ . /) (* . *) (1+ . 1+) (1- . 1-)
     (t . t) (= . =) (< . <) (> . >) (equal . equal)
     (atom . atom) (null . null) (evenp . evenp) (oddp . oddp)
-    (pi . ,pi) (pii . ,(* 2.0 pi))
+    (pi . ,(float pi)) (pii . ,(float (* 2.0 pi))) (pi5 . ,(float (* 0.5 pi)))
     (mvc . multiple-value-call) (multiple-value-call . multiple-value-call)
     (values . values) (values-list . values-list)
     (stringp . stringp) (symbolp . symbolp) (keywordp . keywordp)

@@ -7,7 +7,7 @@
 
 (rnd:set-rnd-state)
 
-(veq:fvdef main (fn)
+(veq:fvdef main ()
 
   (let* ((code (rnd-code *exprs* '!f2))
          (vv (veq:proc-vv code))
@@ -18,8 +18,13 @@
     (veq:vpr (evl:evl* expanded-expr
                (evl:new-env `((x . 1.0) (y . 2.0)
                               (vx . 3.0) (vy . 4.0)
-                              ,@evl:+std-env+))
-    ))))
+                              ,@evl:+std-env+))))
 
-(main (or (second (auxin:cmd-args)) "tmp"))
+    (veq:vpr (evl:evl*
+               '(+
+                 1 (evl:evl* '1)
+                 )))
+    ))
+
+(main)
 

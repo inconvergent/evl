@@ -4,7 +4,9 @@
 (ql:quickload :evl) ; must be available locally. eg. in ~/common-lisp/evl
 (in-package :evl)
 
-; xprt prints the expression and the output
+(defmacro prt (a &aux (a* (gensym "A")))
+  "print expression (a) and the corresponding output. returns the result"
+  `(let ((,a* ,a)) (format t "~&>> ~a~%;; ~a~%" ',a ,a*) ,a*))
 
 (defun main ()
   (let ((kv `((s . 104) (k . 107)                            ; custom var
@@ -14,48 +16,48 @@
                (if res (cdr res) (error "EVL: undefined variable: ~a" x)))
              (evl. (a) (evl a #'env))) ; always use env
 
-      (xprt (evl. '1))
-      (xprt (evl. 's))
-      (xprt (evl. '(+ s k)))
-      (xprt (evl. '(myfx 1)))
+      (prt (evl. '1))
+      (prt (evl. 's))
+      (prt (evl. '(+ s k)))
+      (prt (evl. '(myfx 1)))
 
-      (xprt (evl. '(quote (+ 1 2))))
-      (xprt (evl. '(quote 1)))
-      (xprt (evl. '(quote s)))
+      (prt (evl. '(quote (+ 1 2))))
+      (prt (evl. '(quote 1)))
+      (prt (evl. '(quote s)))
 
-      (xprt (evl. '(list s k)))
-      (xprt (evl. '(progn s k :progn)))
+      (prt (evl. '(list s k)))
+      (prt (evl. '(progn s k :progn)))
 
-      (xprt (evl. '(if (< 4 1) 2 3)))
-      (xprt (evl. '(if (< 4 1) 2)))
+      (prt (evl. '(if (< 4 1) 2 3)))
+      (prt (evl. '(if (< 4 1) 2)))
 
-      (xprt (funcall (evl. '(lambda (x) x)) 99))
+      (prt (funcall (evl. '(lambda (x) x)) 99))
 
-      (xprt (evl. '((lambda (x) (+ s x -10000)) 888)))
-      (xprt (evl. '((lambda (x y) (+ s x y)) 888 999)))
-      (xprt (evl. '((lambda () 77))))
+      (prt (evl. '((lambda (x) (+ s x -10000)) 888)))
+      (prt (evl. '((lambda (x y) (+ s x y)) 888 999)))
+      (prt (evl. '((lambda () 77))))
 
-      (xprt (evl. '(let ((a 1) (b 20)) (+ a b))))
-      (xprt (evl. '(let ((a 1) (b 20)) (+ a b) (- a b))))
+      (prt (evl. '(let ((a 1) (b 20)) (+ a b))))
+      (prt (evl. '(let ((a 1) (b 20)) (+ a b) (- a b))))
 
-      (xprt (evl. '(let ((fx (lambda (x) (+ 1 x))))
-                      (fx (fx 1)))))
+      (prt (evl. '(let ((fx (lambda (x) (+ 1 x))))
+                     (fx (fx 1)))))
 
-      (xprt (evl. '(labels ((fact (x) (if (= x 0)
-                                          1
-                                          (* x (fact (1- x))))))
-                     (fact 7))))
+      (prt (evl. '(labels ((fact (x) (if (= x 0)
+                                         1
+                                         (* x (fact (1- x))))))
+                    (fact 7))))
 
-      (xprt (evl. '(labels ((add0 (x) (add1 (sub1 x)))
-                           (add1 (x) (1+ x))
-                           (sub1 (x) (1- x)))
-                    (add0 7))))
+      (prt (evl. '(labels ((add0 (x) (add1 (sub1 x)))
+                          (add1 (x) (1+ x))
+                          (sub1 (x) (1- x)))
+                   (add0 7))))
 
-      (xprt (evl. '(cond ((< 2 1) 7)
-                         ((< 1 2) 8)
-                         (t :aa))))
+      (prt (evl. '(cond ((< 2 1) 7)
+                        ((< 1 2) 8)
+                        (t :aa))))
 
-      (xprt (evl. '((lambda (&rest rest) rest) 999 333))))))
+      (prt (evl. '((lambda (&rest rest) rest) 999 333))))))
 
 (main)
 
