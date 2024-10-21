@@ -1,7 +1,7 @@
 (defpackage #:evl
   (:use #:common-lisp)
   (:nicknames #:cl-evl)
-  (:export #:+std-env+ #:v?
+  (:export #:+std-env+ #:+std-env+ +full-env+ #:v?
     #:evl #:evl*
     #:evl/env #:evl/extenv #:new-env
     #:evl/do-cond #:evl/do-labels #:evl/do-let
