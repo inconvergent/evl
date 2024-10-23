@@ -120,6 +120,19 @@
  ;   Source file: /data/x/evl/src/interp.lisp
 ```
 
+## `evl:env/merge`
+```
+:missing:
+
+ ; EVL:ENV/MERGE
+ ;   [symbol]
+ ; 
+ ; ENV/MERGE names a compiled function:
+ ;   Lambda-list: (A B &AUX (S (GENSYM)))
+ ;   Derived type: (FUNCTION (T T) (VALUES FUNCTION &OPTIONAL))
+ ;   Source file: /data/x/evl/src/interp.lisp
+```
+
 ## `evl:env/new`
 ```
  ; EVL:ENV/NEW
@@ -155,8 +168,8 @@
  ;   [symbol]
  ; 
  ; EVL names a compiled function:
- ;   Lambda-list: (EXPR ENV)
- ;   Derived type: (FUNCTION (T FUNCTION) *)
+ ;   Lambda-list: (EXPR &OPTIONAL (ENV (ENV/NEW)))
+ ;   Derived type: (FUNCTION (T &OPTIONAL FUNCTION) *)
  ;   Documentation:
  ;     evaluate an EVL expression in env.
  ;     
@@ -165,7 +178,7 @@
  ;      - env: a funcion used to lookup a variable in scope. see: (evl:env/new)
  ;     
  ;     supports CL syntax:
- ;       - if, cond, when, unless, progn
+ ;       - if, and, or, cond, when, unless, progn
  ;       - lambda (lmb), labels (lbl),
  ;       - let, quote, values, multiple-value-list (mvl),
  ;       - destructuring-bind (dsb), multiple-value-bind (mvb),
@@ -192,10 +205,10 @@
  ;   [symbol]
  ; 
  ; EVL* names a compiled function:
- ;   Lambda-list: (EXPR &OPTIONAL (ENV (ENV/NEW)))
- ;   Derived type: (FUNCTION (T &OPTIONAL FUNCTION) *)
+ ;   Lambda-list: (EXPR ENV)
+ ;   Derived type: (FUNCTION (T FUNCTION) *)
  ;   Documentation:
- ;     evaluate expr in env with evl error handling.
+ ;     evaluate expr in env without error handling. see evl:evl for full docs.
  ;   Source file: /data/x/evl/src/interp.lisp
 ```
 
@@ -458,7 +471,7 @@
  ; WITH-ENV names a macro:
  ;   Lambda-list: ((&OPTIONAL (ENV (ENV/NEW))) &BODY BODY)
  ;   Documentation:
- ;     evaluate '(progn ,@body) in env with evl error handling.
+ ;     evaluate '(progn ,@body) in env with error handling.
  ;   Source file: /data/x/evl/src/interp.lisp
 ```
 

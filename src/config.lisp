@@ -5,7 +5,7 @@
 (define-condition evl-error (condition)
   ((expr :initarg :expr :reader expr)
    (msg :initarg :msg :reader msg))
-  (:report (lambda (c s) (format s "██ full msg:~%~a.~&" (msg c))))
+  (:report (lambda (c s) (format s "██ expr:~%~s~%██ full msg:~%~a.~&" (expr c) (msg c))))
   (:documentation "EVL evaluation error for this expr.~&"))
 
 (defun evl-error (expr msg)
@@ -21,8 +21,8 @@
 (defmacro evl/err/ctx-handle (expr &body body)
   (with-gensyms (e)
      `(handler-case (progn ,@body)
-        (evl-error (,e) (warn "~%██  EVL failed to evaluate:~%~s~%~a~&" ,expr ,e))
-        (error (,e) (error "~%██  EVL FATAL ERROR on:~%---~%~s~%---~%~a~&" ,expr ,e))
+        (evl-error (,e) (warn "~%██████  EVL failed to evaluate:~%~s~%~a~&" ,expr ,e))
+        (error (,e) (error "~%██████  EVL FATAL ERROR on:~%---~%~s~%---~%~a~&" ,expr ,e))
         )))
 
 (defun preproc-env (a)

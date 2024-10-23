@@ -12,8 +12,18 @@
   (labels ((env/new/get-var (k &aux (res (assoc k a)))
              (declare (symbol k))
              (if res (cdr res)
-                     (evl-error k (lqn:fmt "~&undefined variable: ~a~%" k)))))
+                     (evl-error k (lqn:fmt "~&undefined variable: ~s~%" k)))))
     #'env/new/get-var))
+
+; TODO: this is inefficient. we only have to check a if there is a hit in a
+(defun env/merge (a b &aux (s (gensym)))
+  (labels ((handle (fx k) (handler-case (funcall b k) (evl-error (e) s)))
+           (env/merge/get-var (k &aux (ra (handle a k))
+                                      (rb (handle b k)))
+             (cond ((and #1=(equal ra s) (equal rb s))
+                    (evl-error k (lqn:fmt "~&undefined variable: ~s~%" k)))
+                   (#1# rb) (t ra))))
+    #'env/merge/get-var))
 
 (defun env/extend-alist (a &optional (env (env/new)))
   (declare (optimize (speed 3)) (list a) (function env))
@@ -83,24 +93,30 @@ requires that evl* implements (progn ...)"
                                        (funcall env* k)))))
      (funcall evl* `(progn ,@body) #'wrp)))
 
+(defun evl/do-let/coerce-list (vars)
+  (mapcar (lambda (x) (etypecase x (list x) (symbol `(,x nil)))) vars))
 (defun evl/do-let (vars body evl* env*)
   (declare (optimize debug) (list body) (function evl* env*))
   "evaluate body in an env with these named variables."
-  (funcall evl* `((lambda ,(mapcar #'car vars) (progn ,@body))
+  (let ((vars (evl/do-let/coerce-list vars)))
+    (funcall evl* `((lambda ,(mapcar #'car vars) (progn ,@body))
                   ,@(mapcar #'second vars))
-                env*))
+                env*)))
 
 (defun evl/do-cond (cnd x body evl* env*)
   (declare (optimize debug) (list body) (function evl* env*))
   "recursively evaluate these conds."
-  (funcall evl* `(if ,cnd ,x (cond ,@body)) env*))
+  (if (not x)
+    (funcall evl* cnd env*)
+    (funcall evl* `(if ,cnd ,x (cond ,@body)) env*)))
 
 (defun evl/eval-coerce-values (expr evl* env*)
   (declare (optimize debug) (function evl* env*))
   "evaluate ~; coerce all values."
-  (funcall evl* `(values ,@(mapcan (lambda (x) (multiple-value-list
-                                                 (funcall evl* x env*)))
-                                   expr))
+  (funcall evl* `(values ,@(mapcar (lambda (x) `(quote ,x))
+                                   (mapcan (lambda (x) (multiple-value-list
+                                                         (funcall evl* x env*)))
+                                           expr)))
            env*))
 
 (defun evl/eval-coerce-apply-values (fx expr evl* env*)
@@ -109,7 +125,106 @@ requires that evl* implements (progn ...)"
   (multiple-value-call (funcall evl* fx env*)
     (evl/eval-coerce-values expr evl* env*)))
 
-(defun evl (expr env)
+(defun evl/do-and (expr evl* env*)
+  (evl/err/ctx `(and ,@expr) ; todo: does not handle values correctly
+    (if expr (loop for e in expr for v = (funcall evl* e env*)
+                   if (not v) do (return-from evl/do-and nil)
+                   finally (return-from evl/do-and v))
+             t)))
+
+(defun evl/do-or (expr evl* env*)
+  (evl/err/ctx `(or ,@expr)
+    (loop for e in expr for v = (funcall evl* e env*)
+          if v do (return-from evl/do-or v)
+          finally (return-from evl/do-or nil))))
+
+(defun evl* (expr env)
+  (declare (optimize debug) (function env))
+  "evaluate expr in env without error handling. see evl:evl for full docs."
+  (let ((*ctx* expr))
+  (cond ((null expr) expr)
+        ((stringp expr) expr)
+        ((numberp expr) expr)
+        ((functionp expr) expr)
+        ((keywordp expr) expr)
+        ((symbolp expr) (funcall env expr)) ; get var from env
+
+        ((car? expr 'declare) nil) ; ignore
+
+        ((car? expr 'quote)
+         (if (= (length expr) 2) (cadr expr)
+                                 (evl-error expr "quote expects 1 argument")))
+
+        ((car? expr 'cl-user::~ 'evl:~ 'veq:~) ; coerce value packs
+         (evl/eval-coerce-values (cdr expr) #'evl* env))
+
+        ((car? expr 'and) (evl/do-and (cdr expr) #'evl env))
+        ((car? expr 'or)  (evl/do-or  (cdr expr) #'evl env))
+
+        ((car? expr 'cl-user::~~ '~~) ; coerce apply fx to values
+         (destructuring-bind (fx &rest rest) (cdr expr)
+           (evl/eval-coerce-apply-values fx rest #'evl* env)))
+
+        ((car? expr 'values)
+         (values-list (mapcar (lambda (x) (evl* x env)) (cdr expr))))
+
+        ((car? expr 'progn)
+         (destructuring-bind (&optional a &rest rest) (cdr expr)
+           (if rest (progn (evl* a env) (evl* (cons 'progn rest) env))
+                    (evl* a env))))
+
+        ((car? expr 'lambda 'lmb)
+         (destructuring-bind (kk &rest rest) (cdr expr)
+           (evl/eval-lambda kk rest #'evl* env)))
+
+        ((car? expr 'let)
+         (destructuring-bind (vars &rest body) (cdr expr)
+           (evl/do-let vars body #'evl* env)))
+
+        ((car? expr 'if)
+         (destructuring-bind (test then &optional else) (cdr expr)
+           (if (evl* test env) (evl* then env) (evl* else env))))
+
+        ((car? expr 'when)
+         (destructuring-bind (cnd &rest rest) (cdr expr)
+          (evl* `(if ,cnd (progn ,@rest)) env)))
+
+        ((car? expr 'unless)
+         (destructuring-bind (cnd &rest rest) (cdr expr)
+          (evl* `(if (not ,cnd) (progn ,@rest)) env)))
+
+        ((car? expr 'cond)
+         (evl/err/ctx `(,@expr)
+           (when (cdr expr)
+             (destructuring-bind ((cnd &optional x) &rest rest)
+                  (cdr expr)
+               (evl/do-cond cnd x rest #'evl* env)))))
+
+        ((car? expr 'destructuring-bind 'dsb)
+         (destructuring-bind (vars in &rest rest) (cdr expr)
+           (evl/eval-dsb vars in rest #'evl* env)))
+
+        ((car? expr 'multiple-value-bind 'mvb 'veq:mvb)
+         (destructuring-bind (vars in &rest rest) (cdr expr)
+           (evl/eval-mvb vars in rest #'evl* env)))
+
+        ((car? expr 'multiple-value-list 'mvl)
+         (multiple-value-list (evl* (cadr expr) env)))
+
+        ((car? expr 'labels 'lbl)
+         (destructuring-bind (pairs &rest body) (cdr expr)
+           (evl/do-labels pairs body #'evl* env)))
+
+        ((consp expr) ; (apply (fx/lambda) ...)
+         (evl/err/ctx `(,@expr)
+           (apply (evl* (car expr) env)
+                  (mapcar (lambda (x) (evl* x env))
+                          (cdr expr)))))
+        (t (error "~&-->>~%invalid expression:~%  ~s <<--~&"
+                  expr)))))
+
+
+(defun evl (expr &optional (env (env/new)))
   (declare (optimize debug) (function env))
   "evaluate an EVL expression in env.
 
@@ -118,7 +233,7 @@ arguments:
  - env: a funcion used to lookup a variable in scope. see: (evl:env/new)
 
 supports CL syntax:
-  - if, cond, when, unless, progn
+  - if, and, or, cond, when, unless, progn
   - lambda (lmb), labels (lbl),
   - let, quote, values, multiple-value-list (mvl),
   - destructuring-bind (dsb), multiple-value-bind (mvb),
@@ -136,90 +251,11 @@ deviations from regular CL syntax:
     so all defaults are nil.
   - &aux is not supported.
   "
-  (let ((*ctx* expr))
-  (cond ((null expr) expr)
-        ((stringp expr) expr)
-        ((numberp expr) expr)
-        ((functionp expr) expr)
-        ((keywordp expr) expr)
-        ((symbolp expr) (funcall env expr)) ; get var from env
-
-        ((car? expr 'declare) nil) ; ignore
-
-        ((car? expr 'quote) (cadr expr))
-
-        ((car? expr 'cl-user::~ '~ 'veq:~) ; coerce value packs
-         (evl/eval-coerce-values (cdr expr) #'evl env))
-
-        ((car? expr 'cl-user::~~ '~~) ; coerce apply fx to values
-         (destructuring-bind (fx &rest rest) (cdr expr)
-           (evl/eval-coerce-apply-values fx rest #'evl env)))
-
-        ((car? expr 'values)
-         (values-list (mapcar (lambda (x) (evl x env)) (cdr expr))))
-
-        ((car? expr 'progn)
-         (destructuring-bind (&optional a &rest rest) (cdr expr)
-           (if rest (progn (evl a env) (evl (cons 'progn rest) env))
-                    (evl a env))))
-
-        ((car? expr 'lambda 'lmb)
-         (destructuring-bind (kk &rest rest) (cdr expr)
-           (evl/eval-lambda kk rest #'evl env)))
-
-        ((car? expr 'let)
-         (destructuring-bind (vars &rest body) (cdr expr)
-           (evl/do-let vars body #'evl env)))
-
-        ((car? expr 'if)
-         (destructuring-bind (test then &optional else) (cdr expr)
-           (if (evl test env) (evl then env) (evl else env))))
-
-        ((car? expr 'when)
-         (destructuring-bind (cnd &rest rest) (cdr expr)
-          (evl `(if ,cnd (progn ,@rest)) env)))
-
-        ((car? expr 'unless)
-         (destructuring-bind (cnd &rest rest) (cdr expr)
-          (evl `(if (not ,cnd) (progn ,@rest)) env)))
-
-        ((car? expr 'cond)
-         (when (cdr expr) (destructuring-bind ((cnd x) &rest rest)
-                                (cdr expr)
-                            (evl/do-cond cnd x rest #'evl env))))
-
-        ((car? expr 'destructuring-bind 'dsb)
-         (destructuring-bind (vars in &rest rest) (cdr expr)
-           (evl/eval-dsb vars in rest #'evl env)))
-
-        ((car? expr 'multiple-value-bind 'mvb 'veq:mvb)
-         (destructuring-bind (vars in &rest rest) (cdr expr)
-           (evl/eval-mvb vars in rest #'evl env)))
-
-        ((car? expr 'multiple-value-list 'mvl)
-         (multiple-value-list (evl (cadr expr) env)))
-
-        ((car? expr 'labels 'lbl)
-         (destructuring-bind (pairs &rest body) (cdr expr)
-           (evl/do-labels pairs body #'evl env)))
-
-        ((consp expr) ; (apply (fx/lambda) ...)
-         (evl/err/ctx `(,@expr)
-           (apply (evl (car expr) env)
-                  (mapcar (lambda (x) (evl x env))
-                          (cdr expr)))))
-        (t (error "~&-->>~%invalid expression:~%  ~s <<--~&"
-                  expr)))))
-
-
-(defun evl* (expr &optional (env (env/new)))
-  (declare (optimize debug) (function env))
-  "evaluate expr in env with evl error handling."
-  (evl/err/ctx-handle expr (evl expr env)))
+  (evl/err/ctx-handle expr (evl* expr env)))
 
 (defmacro with-env ((&optional (env (env/new))) &body body)
-  "evaluate '(progn ,@body) in env with evl error handling."
+  "evaluate '(progn ,@body) in env with error handling."
   (with-gensyms (env*)
     `(let ((,env* ,env)) (declare (function ,env*))
-       (evl* '(progn ,@body) ,env*))))
+       (evl '(progn ,@body) ,env*))))
 

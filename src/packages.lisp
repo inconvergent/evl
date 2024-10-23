@@ -8,7 +8,7 @@
     #:even? #:odd? #:some? #:every? #:zero? #:member? #:car?
     #:~ #:~~ #:dsb #:lbl #:lmb #:mvb #:mvl
     ; utils
-    #:env/extend-pair #:env/extend-alist #:env/empty #:env/new
+    #:env/extend-pair #:env/extend-alist #:env/empty #:env/new #:env/merge
     #:evl/do-cond #:evl/do-labels #:evl/do-let
     #:evl/eval-dsb #:evl/eval-mvb #:evl/eval-lambda #:evl/eval-coerce-values
     ))

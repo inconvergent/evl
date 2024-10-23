@@ -46,22 +46,30 @@
 
     ; (print code)
     (lqn:out "---")
-    (print expanded-expr)
-    (lqn:out code)
+    ; (print expanded-expr)
+    ; (lqn:out code)
     (lqn:out "---")
-    (veq:vp (evl:evl*
+    (veq:vp (evl:evl
               ; expanded-expr
-              '(destructuring-bind (a b) (list 1 hh) (list kk a b) )
+              '(progn
+                 (list 1)
+                 (print (cond ((< 1 2))))
+                 (print (cond ((< 2 1))))
+                 (print (cond ((< 1 2) :x)))
+                 (print (cond ((< 2 1) :y)))
 
+                 (print (cond ((< 1 2)) ((< 2 4))))
+                 (print (cond ((< 2 1)) ((> 4 3))))
+
+
+                 )
               (evl:env/new `((x . 1.0) (y . 2.0)
-                                     (vx . 3.0) (vy . 4.0)
-                                     ,@evl:+std-env+))
+                             (vx . 3.0) (vy . 4.0)
+                             ,@evl:+std-env+))))
 
-        ))
-
-    (veq:vp (eval `(veq:fvprogn
-                     (let ((x 1.0) (y 2.0) (vx 3.0) (vy 4.0))
-                       ,code))))
+    ; (veq:vp (eval `(veq:fvprogn
+    ;                  (let ((x 1.0) (y 2.0) (vx 3.0) (vy 4.0))
+    ;                    ,code))))
     ))
 
 ; (cond ())

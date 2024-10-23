@@ -30,5 +30,6 @@
 
 (defun run-tests ()
   (-run-tests '(#P"test/evl.lisp"
+                #P"test/evl-2.lisp"
                 #P"test/evl-values.lisp"
                 #P"test/evl-self.lisp")))
