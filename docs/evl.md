@@ -556,14 +556,6 @@
  ;   Source file: /data/x/evl/src/evl-state-machine.lisp
 ```
 
-## `evl:st/g`
-```
-:missing:
-
- ; EVL:ST/G
- ;   [symbol]
-```
-
 ## `evl:st/itr/all`
 ```
  ; EVL:ST/ITR/ALL
@@ -603,15 +595,27 @@
  ;   Source file: /data/x/evl/src/evl-state-machine.lisp
 ```
 
+## `evl:st/new`
+```
+ ; EVL:ST/NEW
+ ;   [symbol]
+ ; 
+ ; ST/NEW names a macro:
+ ;   Lambda-list: (RULE-NAME VAL-EXPR)
+ ;   Documentation:
+ ;     new state with this rule and expression.
+ ;   Source file: /data/x/evl/src/evl-state-machine.lisp
+```
+
 ## `evl:st/with-rules`
 ```
-:missing:
-
  ; EVL:ST/WITH-RULES
  ;   [symbol]
  ; 
  ; ST/WITH-RULES names a macro:
  ;   Lambda-list: (RULES &BODY BODY)
+ ;   Documentation:
+ ;     state machine context with these rules.
  ;   Source file: /data/x/evl/src/evl-state-machine.lisp
 ```
 

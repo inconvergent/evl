@@ -1,25 +1,40 @@
 
 (in-package #:evl-tests)
 
-(plan 2)
+(plan 3)
 
 (subtest "test state machine"
-   (st/with-rules
-    ((gx i (cond ((< i 4)  (values i (st/new gx (1+ i)))))))
-    (let ((evl:*act* (lambda (s) (lqn:out "hi~a |>" s))))
-      (is (lqn:stdstr (let ((gg (st/new gx 0)))
-                        (st/itr/all gg #'princ)
-                        (st/itr/all gg)))
-          "0123hi0 |>hi1 |>hi2 |>hi3 |>")))
+   (st/with-rules ((gx i (cond ((< i 4)  (values i (st/new gx (1+ i)))))))
+     (let ((evl:*act* (lambda (s) (lqn:out "hi~a |>" s))))
+       (is (lqn:stdstr (let ((gg (st/new gx 0)))
+                         (st/itr/all gg #'princ)
+                         (st/itr/all gg)))
+           "0123hi0 |>hi1 |>hi2 |>hi3 |>")))
 
+  (st/with-rules
+    ((gx i (values i (if (< i 20) (st/new gx (1+ i)) t))))
+      (let* ((gg (st/new gx 0)))
+        (mvb (g v) (st/itr/until gg (lambda (i) (= i 10)))  (is (list (functionp g) v) '(t 10)))
+        (mvb (g v) (st/itr/until gg (lambda (i) (= i 100))) (is (list (functionp g) v) '(nil 20)))
+
+        (mvb (g v) (st/itr/n gg 10)  (is (list (functionp g) v) '(t 9)))
+        (mvb (g v) (st/itr/n gg 100) (is (list (functionp g) v) '(nil 20)))
+        (mvb (g v) (st/itr/all gg)   (is (list (functionp g) v) '(nil 20)))
+
+        (mvb (g v) (st/itr/n (st/itr/n gg 10) 3)
+             (is (list (functionp g) v) '(t 12)))
+
+        (mvb (g v) (st/itr/n (st/itr/until gg (lambda (i) (= i 10))) 2)
+             (is (list (functionp g) v) '(t 11)))))
 
    (st/with-rules
     ((gx i (cond ((< i 10) (values i (st/new gx (progn (princ :/exec)
                                                     (1+ i))))))))
     (is (lqn:stdstr (let ((gg (st/new gx 0)))
                       (st/itr/n gg 3 #'princ)))
-        "0/EXEC1/EXEC2"))
+        "0/EXEC1/EXEC2")))
 
+(subtest "test state machine 2"
   (st/with-rules
     ((gen-a i (cond ((< i 4)  (values i (st/new gen-a (1+ i))))
                     ((< i 14) (values i (st/new gen-a (+ 3 i))))))
@@ -48,22 +63,7 @@
          '(nil ("4/" "3/" "2/" "1/" "0/")))
      (is (mvb (g* val) (st/acc/until gg (lambda (o) (> o 3)))
               (list val (functionp g*)))
-         '((4 3 2 1 0) T))))
-
-  (st/with-rules
-    ((gx i (values i (if (< i 20) (st/new gx (1+ i)) t))))
-      (let* ((gg (st/new gx 0)))
-        (mvb (g v) (st/itr/until gg (lambda (i) (= i 10)))
-             (is (list (functionp g) v) '(t 10)))
-        (mvb (g v) (st/itr/until gg (lambda (i) (= i 100)))
-             (is (list (functionp g) v) '(nil 20)))
-        (mvb (g v) (st/itr/n gg 10)
-             (is (list (functionp g) v) '(t 9)))
-        (mvb (g v) (st/itr/n gg 100)
-             (is (list (functionp g) v) '(nil 20)))
-        (mvb (g v) (st/itr/all gg)
-             (is (list (functionp g) v) '(nil 20))))))
-
+         '((4 3 2 1 0) T)))))
 
 (subtest "test state machine fizzbuzz"
   (labels ((which? (i) (cond ((and #1=(zerop (mod i 3))
@@ -93,3 +93,4 @@ FIZZ 19
 BUZZ"))))
 
 (unless (finalize) (error "error in test state machine"))
+

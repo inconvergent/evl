@@ -3,23 +3,20 @@
 (defpackage #:evl-tests
   (:use #:cl #:prove)
   (:import-from #:evl
-    #:+std-env+
-    #:evl #:evl* #:with-env
+    #:+std-env+ #:evl #:evl* *act* #:with-env #:evl-error
     ; language
     #:str? #:num? #:function? #:keyword? #:symbol? #:null? #:list? #:cons?
     #:even? #:odd? #:some? #:every? #:zero? #:member? #:car?
     #:~ #:~~ #:dsb #:lbl #:lmb #:mvb #:mvl #:lst
-    #:st/with-rules #:st/new #:later
-    #:st/itr/all
-    #:st/acc/all
-    #:st/acc/n
-    #:st/acc/until
-    #:st/itr/n
-    #:st/itr/until
     ; utils
-    #:env/extend-pair #:env/extend-alist #:env/empty #:env/new
+    #:env/extend-pair #:env/extend-alist #:env/empty #:env/new #:env/merge
+    #:dev/do-or #:dev/do-and
     #:dev/do-cond #:dev/do-labels #:dev/do-let
-    #:dev/eval-dsb #:dev/eval-mvb #:dev/eval-lambda #:dev/eval-coerce-values)
+    #:dev/eval-dsb #:dev/eval-mvb #:dev/eval-lambda #:dev/eval-coerce-values
+    ; state machine
+    #:later #:st/with-rules #:st/new #:later
+    #:st/acc/all #:st/acc/n #:st/acc/until
+    #:st/itr/all #:st/itr/n #:st/itr/until)
   (:export #:run-tests))
 (in-package #:evl-tests)
 
