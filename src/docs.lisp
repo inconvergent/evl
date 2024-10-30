@@ -7,13 +7,14 @@
 (defun -strsrt (l) (sort l #'string-lessp :key #'car))
 
 (defun desc (sym) (declare (symbol sym))
-  (apply #'mkstr (mapcar (lambda (s) (format nil " ; ~a~%" s))
-                         (butlast (veq::split-string #\Newline (-outstr (describe sym)))))))
+  (apply #'lqn:str! (mapcar (lambda (s) (format nil " ; ~a~%" s))
+                            (butlast (veq::split-string #\Newline ; use lqn
+                                        (-outstr (describe sym)))))))
 (defun docstrings (sym) (declare (symbol sym))
-  (apply #'mkstr (mapcar (lambda (o) (mkstr o #\Newline))
-                         (remove-if-not #'identity
-                           (mapcar (lambda (ty) (documentation sym ty))
-                                   '(variable function setf))))))
+  (apply #'lqn:str! (mapcar (lambda (o) (lqn:str! o #\Newline))
+                            (remove-if-not #'identity
+                              (mapcar (lambda (ty) (documentation sym ty))
+                                      '(variable function setf))))))
 (defun select-docs (sym) (declare (symbol sym))
   (let* ((docs (find-if (lambda (c) (eq sym c)) *docstring-map* :key #'car))
          (idocs (docstrings sym))
@@ -29,7 +30,7 @@
 (defmacro pckgs (pkg)
   (with-gensyms (sym)
     `(-strsrt (loop for ,sym being the external-symbols of (find-package ,pkg)
-                 collect (list (mkstr ,sym) ,sym)))))
+                    collect (list (lqn:str! ,sym) ,sym)))))
 
 (defmacro ext-symbols? (pkg &optional mode)
   "list all external symbols in pkg. use :verbose to inlcude docstring.
@@ -41,7 +42,7 @@ use :pretty to print verbose output to stdout in a readable form."
                do (multiple-value-bind (,doc ,skip)
                         (select-docs ,sym)
                     (unless ,skip (format t "~&## `~(~a:~a~)`~&```~&~a~&```~%~&~%"
-                                               (mkstr ,pkg) ,str ,doc)))))
+                                          (lqn:str! ,pkg) ,str ,doc)))))
       (:pairs `(loop for (,str ,sym) in (pckgs ,pkg)
                      collect (list ,str (select-docs ,sym))))
       (otherwise `(loop for (,str ,sym) in (pckgs ,pkg) collect ,str)))))

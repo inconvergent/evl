@@ -1,15 +1,3 @@
-## `evl:*act*`
-```
-:missing:
-
- ; EVL:*ACT*
- ;   [symbol]
- ; 
- ; *ACT* names a special variable:
- ;   Declared type: FUNCTION
- ;   Value: #<FUNCTION IDENTITY>
-```
-
 ## `evl:+std-env+`
 ```
  ; EVL:+STD-ENV+
@@ -396,18 +384,6 @@
  ;   [symbol]
 ```
 
-## `evl:later`
-```
- ; EVL:LATER
- ;   [symbol]
- ; 
- ; LATER names a macro:
- ;   Lambda-list: (EXPR)
- ;   Documentation:
- ;     wrap expression in (lambda () ...).
- ;   Source file: /data/x/evl/src/utils.lisp
-```
-
 ## `evl:lbl`
 ```
 :missing:
@@ -511,112 +487,6 @@
 
  ; EVL:SOME?
  ;   [symbol]
-```
-
-## `evl:st/acc/all`
-```
- ; EVL:ST/ACC/ALL
- ;   [symbol]
- ; 
- ; ST/ACC/ALL names a compiled function:
- ;   Lambda-list: (STX &OPTIONAL (ACC (FUNCTION CONS)) ACT RES)
- ;   Derived type: (FUNCTION (T &OPTIONAL FUNCTION T T)
- ;                  (VALUES NULL T &OPTIONAL))
- ;   Documentation:
- ;     accumulate all.
- ;   Source file: /data/x/evl/src/evl-state-machine.lisp
-```
-
-## `evl:st/acc/n`
-```
- ; EVL:ST/ACC/N
- ;   [symbol]
- ; 
- ; ST/ACC/N names a compiled function:
- ;   Lambda-list: (STX &OPTIONAL (N 1) (ACC (FUNCTION CONS)) ACT RES)
- ;   Derived type: (FUNCTION (T &OPTIONAL FIXNUM FUNCTION T T)
- ;                  (VALUES T T &OPTIONAL))
- ;   Documentation:
- ;     accumulate at most n times.
- ;   Source file: /data/x/evl/src/evl-state-machine.lisp
-```
-
-## `evl:st/acc/until`
-```
- ; EVL:ST/ACC/UNTIL
- ;   [symbol]
- ; 
- ; ST/ACC/UNTIL names a compiled function:
- ;   Lambda-list: (STX &OPTIONAL (UNTIL (FUNCTION IDENTITY))
- ;                 (ACC (FUNCTION CONS)) ACT RES)
- ;   Derived type: (FUNCTION (T &OPTIONAL FUNCTION FUNCTION T T)
- ;                  (VALUES (OR NULL FUNCTION) T &OPTIONAL))
- ;   Documentation:
- ;     accumulate until.
- ;   Source file: /data/x/evl/src/evl-state-machine.lisp
-```
-
-## `evl:st/itr/all`
-```
- ; EVL:ST/ITR/ALL
- ;   [symbol]
- ; 
- ; ST/ITR/ALL names a compiled function:
- ;   Lambda-list: (STX &OPTIONAL ACT RES)
- ;   Derived type: (FUNCTION (T &OPTIONAL T T) *)
- ;   Documentation:
- ;     iterate all.
- ;   Source file: /data/x/evl/src/evl-state-machine.lisp
-```
-
-## `evl:st/itr/n`
-```
- ; EVL:ST/ITR/N
- ;   [symbol]
- ; 
- ; ST/ITR/N names a compiled function:
- ;   Lambda-list: (STX &OPTIONAL (N 1) ACT RES)
- ;   Derived type: (FUNCTION (T &OPTIONAL FIXNUM T T) *)
- ;   Documentation:
- ;     iterate at most n times.
- ;   Source file: /data/x/evl/src/evl-state-machine.lisp
-```
-
-## `evl:st/itr/until`
-```
- ; EVL:ST/ITR/UNTIL
- ;   [symbol]
- ; 
- ; ST/ITR/UNTIL names a compiled function:
- ;   Lambda-list: (STX &OPTIONAL (UNTIL (FUNCTION IDENTITY)) ACT RES)
- ;   Derived type: (FUNCTION (T &OPTIONAL FUNCTION T T) *)
- ;   Documentation:
- ;     iterate until.
- ;   Source file: /data/x/evl/src/evl-state-machine.lisp
-```
-
-## `evl:st/new`
-```
- ; EVL:ST/NEW
- ;   [symbol]
- ; 
- ; ST/NEW names a macro:
- ;   Lambda-list: (RULE-NAME VAL-EXPR)
- ;   Documentation:
- ;     new state with this rule and expression.
- ;   Source file: /data/x/evl/src/evl-state-machine.lisp
-```
-
-## `evl:st/with-rules`
-```
- ; EVL:ST/WITH-RULES
- ;   [symbol]
- ; 
- ; ST/WITH-RULES names a macro:
- ;   Lambda-list: (RULES &BODY BODY)
- ;   Documentation:
- ;     state machine context with these rules.
- ;   Source file: /data/x/evl/src/evl-state-machine.lisp
 ```
 
 ## `evl:str?`

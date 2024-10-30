@@ -9,8 +9,8 @@
                (:file "utils" :depends-on ("packages"))
                (:file "docs" :depends-on ("utils"))
                (:file "config" :depends-on ("docs"))
-               (:file "evl-state-machine" :depends-on ("config"))
-               (:file "interp" :depends-on ("evl-state-machine"))
+               (:file "stm" :depends-on ("config"))
+               (:file "interp" :depends-on ("stm"))
                (:file "code-factory" :depends-on ("interp"))
                ))
 

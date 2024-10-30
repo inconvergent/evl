@@ -9,13 +9,14 @@ To load "evl":
   Load 1 ASDF system:
     evl
 ; Loading "evl"
-; compiling file "/data/x/evl/src/packages.lisp" (written 30 OCT 2024 09:18:22 AM):
+; compiling file "/data/x/evl/src/packages.lisp" (written 30 OCT 2024 02:53:10 PM):
+[package stm].....................................
 [package evl].....................................
 [package evl/code]
 
 ; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/packages-tmpGHU3ALSV.fasl
 ; compilation finished in 0:00:00.001
-; compiling file "/data/x/evl/src/utils.lisp" (written 29 OCT 2024 11:55:51 PM):
+; compiling file "/data/x/evl/src/utils.lisp" (written 30 OCT 2024 02:57:11 PM):
 .
 ; file: /data/x/evl/src/utils.lisp
 ; in: DEFUN MATCH-PREF
@@ -36,7 +37,7 @@ To load "evl":
 
 ; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/utils-tmpAAURSO1.fasl
 ; compilation finished in 0:00:00.015
-; compiling file "/data/x/evl/src/docs.lisp" (written 29 OCT 2024 11:55:51 PM):
+; compiling file "/data/x/evl/src/docs.lisp" (written 30 OCT 2024 02:48:18 PM):
 .
 ; file: /data/x/evl/src/docs.lisp
 ; in: DEFVAR *DOCSTRING-MAP*
@@ -47,20 +48,20 @@ To load "evl":
 
 ; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/docs-tmp5GEXGEG5.fasl
 ; compilation finished in 0:00:00.013
-; compiling file "/data/x/evl/src/config.lisp" (written 29 OCT 2024 11:55:51 PM):
+; compiling file "/data/x/evl/src/config.lisp" (written 30 OCT 2024 10:24:03 AM):
 
 ; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/config-tmpAR3FSGEY.fasl
-; compilation finished in 0:00:00.008
-; compiling file "/data/x/evl/src/evl-state-machine.lisp" (written 30 OCT 2024 09:12:56 AM):
+; compilation finished in 0:00:00.009
+; compiling file "/data/x/evl/src/stm.lisp" (written 31 OCT 2024 01:08:07 PM):
 .
 
-; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/evl-state-machine-tmpJAIDFZTC.fasl
-; compilation finished in 0:00:00.011
-; compiling file "/data/x/evl/src/interp.lisp" (written 29 OCT 2024 11:55:51 PM):
+; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/stm-tmpJAIDFZTC.fasl
+; compilation finished in 0:00:00.013
+; compiling file "/data/x/evl/src/interp.lisp" (written 30 OCT 2024 02:46:45 PM):
 ...
 
 ; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/interp-tmp8V3J6PE9.fasl
-; compilation finished in 0:00:00.091
+; compilation finished in 0:00:00.096
 ; compiling file "/data/x/evl/src/code-factory.lisp" (written 29 OCT 2024 11:55:51 PM):
 
 ; file: /data/x/evl/src/code-factory.lisp
@@ -77,17 +78,17 @@ To load "evl":
 
 
 ; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/code-factory-tmp9V47YWQF.fasl
-; compilation finished in 0:00:00.011
+; compilation finished in 0:00:00.010
 ; 
 ; compilation unit finished
 ;   printed 4 notes
 
 Evaluation took:
-  0.232 seconds of real time
-  0.232434 seconds of total run time (0.174634 user, 0.057800 system)
-  100.00% CPU
-  671 forms interpreted
-  1,076 lambdas converted
-  987,825,418 processor cycles
-  79,742,000 bytes consed
+  0.237 seconds of real time
+  0.237635 seconds of total run time (0.176788 user, 0.060847 system)
+  100.42% CPU
+  697 forms interpreted
+  1,087 lambdas converted
+  1,009,900,810 processor cycles
+  80,360,720 bytes consed
   

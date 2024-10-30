@@ -2,11 +2,6 @@
 
 (defvar *ctx* nil)
 
-(declaim (function *act*))
-; (defvar *act* #'(lambda (s) (lqn:out "~&(identity:~a)~&" s)))
-(defvar *act* #'identity)
-
-
 (define-condition evl-error (condition)
   ((expr :initarg :expr :reader expr)
    (msg :initarg :msg :reader msg))

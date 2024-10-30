@@ -47,7 +47,7 @@
 (defun flat-arg-list (args)
   (declare (optimize (speed 3)) (list args))
   "flatten, and strip &-prefixed symbols."
-  (remove-if (lambda (s) (match-pref (mkstr s) "&"))
+  (remove-if (lambda (s) (match-pref (lqn:str! s) "&"))
              (flatten args)))
 
 (defun dev/eval-dsb (args in expr evl* env*)
