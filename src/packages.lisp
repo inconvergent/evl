@@ -3,10 +3,11 @@
   (:use #:common-lisp)
   (:nicknames #:cl-state-machine)
   (:export #:*act*
+    #:r/print #:r/print* #:r/identity
     #:? #:new #:with-rules #:later
     #:acc/all #:acc/n #:acc/until
     #:itr/all #:itr/n #:itr/until)
-  (:documentation "infinite state machine utilities."))
+  (:documentation "rule-based (in)finite state machine utilities."))
 
 (defpackage #:evl
   (:use #:common-lisp)

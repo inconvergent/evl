@@ -9,7 +9,7 @@ To load "evl":
   Load 1 ASDF system:
     evl
 ; Loading "evl"
-; compiling file "/data/x/evl/src/packages.lisp" (written 30 OCT 2024 02:53:10 PM):
+; compiling file "/data/x/evl/src/packages.lisp" (written 01 NOV 2024 07:46:14 AM):
 [package stm].....................................
 [package evl].....................................
 [package evl/code]
@@ -37,7 +37,7 @@ To load "evl":
 
 ; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/utils-tmpAAURSO1.fasl
 ; compilation finished in 0:00:00.015
-; compiling file "/data/x/evl/src/docs.lisp" (written 30 OCT 2024 02:48:18 PM):
+; compiling file "/data/x/evl/src/docs.lisp" (written 31 OCT 2024 08:46:02 PM):
 .
 ; file: /data/x/evl/src/docs.lisp
 ; in: DEFVAR *DOCSTRING-MAP*
@@ -47,23 +47,23 @@ To load "evl":
 
 
 ; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/docs-tmp5GEXGEG5.fasl
-; compilation finished in 0:00:00.013
-; compiling file "/data/x/evl/src/config.lisp" (written 30 OCT 2024 10:24:03 AM):
+; compilation finished in 0:00:00.012
+; compiling file "/data/x/evl/src/config.lisp" (written 31 OCT 2024 08:46:02 PM):
 
 ; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/config-tmpAR3FSGEY.fasl
-; compilation finished in 0:00:00.009
-; compiling file "/data/x/evl/src/stm.lisp" (written 31 OCT 2024 01:08:07 PM):
-.
+; compilation finished in 0:00:00.008
+; compiling file "/data/x/evl/src/stm.lisp" (written 01 NOV 2024 08:56:41 AM):
+..
 
 ; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/stm-tmpJAIDFZTC.fasl
-; compilation finished in 0:00:00.013
-; compiling file "/data/x/evl/src/interp.lisp" (written 30 OCT 2024 02:46:45 PM):
-...
+; compilation finished in 0:00:00.023
+; compiling file "/data/x/evl/src/interp.lisp" (written 31 OCT 2024 08:46:02 PM):
+..
 
 ; wrote /home/anders/.cache/common-lisp/sbcl-2.4.4-linux-x64/data/x/evl/src/interp-tmp8V3J6PE9.fasl
-; compilation finished in 0:00:00.096
+; compilation finished in 0:00:00.090
 ; compiling file "/data/x/evl/src/code-factory.lisp" (written 29 OCT 2024 11:55:51 PM):
-
+.
 ; file: /data/x/evl/src/code-factory.lisp
 ; in: DEFUN GEN
 ;     (COND
@@ -84,11 +84,11 @@ To load "evl":
 ;   printed 4 notes
 
 Evaluation took:
-  0.237 seconds of real time
-  0.237635 seconds of total run time (0.176788 user, 0.060847 system)
-  100.42% CPU
-  697 forms interpreted
-  1,087 lambdas converted
-  1,009,900,810 processor cycles
-  80,360,720 bytes consed
+  0.241 seconds of real time
+  0.241677 seconds of total run time (0.173821 user, 0.067856 system)
+  100.41% CPU
+  743 forms interpreted
+  1,208 lambdas converted
+  1,027,094,057 processor cycles
+  84,597,296 bytes consed
   
