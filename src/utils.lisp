@@ -41,7 +41,4 @@ almost like multiple-value-list, except it handles multiple arguments."
        s d))
 
 (defmacro lmb (&rest rest) "alias for lambda" `(lambda ,@rest))
-(defmacro later (expr)
-  "wrap expression in (lambda () ...)."
-  `(lambda () ,expr))
 

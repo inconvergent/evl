@@ -5,7 +5,6 @@
   (:import-from #:evl
     #:+std-env+ #:evl #:evl* #:with-env #:evl-error
     ; language
-    #:later
     #:str? #:num? #:function? #:keyword? #:symbol? #:null? #:list? #:cons?
     #:even? #:odd? #:some? #:every? #:zero? #:member? #:car?
     #:~ #:~~ #:dsb #:lbl #:lmb #:mvb #:mvl #:lst
@@ -33,5 +32,4 @@
   (-run-tests '(#P"test/evl.lisp"
                 #P"test/evl-2.lisp"
                 #P"test/evl-values.lisp"
-                #P"test/evl-self.lisp"
-                #P"test/evl-state-machine.lisp")))
+                #P"test/evl-self.lisp")))

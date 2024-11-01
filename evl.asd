@@ -9,8 +9,7 @@
                (:file "utils" :depends-on ("packages"))
                (:file "docs" :depends-on ("utils"))
                (:file "config" :depends-on ("docs"))
-               (:file "stm" :depends-on ("config"))
-               (:file "interp" :depends-on ("stm"))
+               (:file "interp" :depends-on ("config"))
                (:file "code-factory" :depends-on ("interp"))
                ))
 
